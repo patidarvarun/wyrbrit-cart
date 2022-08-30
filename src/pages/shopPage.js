@@ -5,7 +5,7 @@ import ListItem from "@mui/material/ListItem";
 import ListItemButton from "@mui/material/ListItemButton";
 import categories from "../data/wooCommerce/category";
 import productss from "../data/wooCommerce/products";
-
+import { MainNavbar } from "../components/main-navbar";
 import { styled } from "@mui/material/styles";
 import Paper from "@mui/material/Paper";
 import Grid from "@mui/material/Grid";
@@ -27,6 +27,9 @@ const ShopPage = () => {
 
   return (
     <div>
+      <MainNavbar />
+      <br />
+      <br />
       <Box sx={{ flexGrow: 1 }}>
         <Grid container spacing={2}>
           <Grid item xs={3}>
@@ -49,7 +52,10 @@ const ShopPage = () => {
             </Item>
           </Grid>
           <Grid item xs={9}>
-            <h1>Shop Page</h1>
+            <Item>
+              <h3>Products</h3>
+            </Item>
+            {/* <h1>Shop Page</h1> */}
             <Grid container spacing={3}>
               {product &&
                 product.map((item) => (

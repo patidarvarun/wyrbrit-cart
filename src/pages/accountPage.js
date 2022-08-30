@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { collection, getDocs } from "firebase/firestore";
 import { database } from "../../firebase/ firebaseConfig";
+import { MainNavbar } from "../components/main-navbar";
+
 const dbInstance = collection(database, "users");
 
 const AccountPage = () => {
@@ -19,6 +21,9 @@ const AccountPage = () => {
 
   return (
     <>
+      <MainNavbar />
+      <br />
+      <br />
       <h1 style={{ textAlign: "center" }}>Account Page</h1>
       <div>
         <p>Id: {userDetail && userDetail.login.user.id}</p>
