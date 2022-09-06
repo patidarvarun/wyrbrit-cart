@@ -9,9 +9,9 @@ const AccountPage = () => {
   const [user, setUser] = useState("");
   const [userData, setUserData] = useState("");
   const getNotes = async () => {
-    getDocs(dbInstance).then((data) => {
-      setUserData(data._snapshot.docChanges);
-    });
+    const data = await getDocs(dbInstance);
+    const getData = data.docs.map((doc) => doc.data());
+    setUserData(getData);
   };
   useEffect(() => {
     getNotes();
@@ -35,24 +35,12 @@ const AccountPage = () => {
         <h1 style={{ textAlign: "center" }}>Firebase Detail</h1>
         {userData &&
           userData.map((data) => (
-            <>
+            <div key={data}>
               <hr />
-              <p>
-                FirstName:{" "}
-                {
-                  data?.doc?.data?.value?.mapValue?.fields?.firstName
-                    ?.stringValue
-                }
-              </p>
-              <p>
-                LastName:{" "}
-                {
-                  data?.doc?.data?.value?.mapValue?.fields?.lastName
-                    ?.stringValue
-                }
-              </p>
+              <p>FirstName: {data?.firstName}</p>
+              <p>LastName: {data?.lastName}</p>
               <hr />
-            </>
+            </div>
           ))}
       </span>
     </>

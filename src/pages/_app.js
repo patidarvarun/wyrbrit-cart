@@ -24,6 +24,7 @@ import { gtm } from "../lib/gtm";
 import { store } from "../store";
 import { createTheme } from "../theme";
 import { createEmotionCache } from "../utils/create-emotion-cache";
+import { SnackbarProvider } from "notistack";
 import "../i18n";
 
 const client = new ApolloClient({
@@ -67,17 +68,19 @@ const App = (props) => {
                     >
                       <RTL direction={settings.direction}>
                         <CssBaseline />
-                        <Toaster position="top-center" />
-                        <SettingsButton />
-                        <AuthConsumer>
-                          {(auth) =>
-                            !auth.isInitialized ? (
-                              <SplashScreen />
-                            ) : (
-                              getLayout(<Component {...pageProps} />)
-                            )
-                          }
-                        </AuthConsumer>
+                        <SnackbarProvider maxSnack={3}>
+                          <Toaster position="top-center" />
+                          <SettingsButton />
+                          <AuthConsumer>
+                            {(auth) =>
+                              !auth.isInitialized ? (
+                                <SplashScreen />
+                              ) : (
+                                getLayout(<Component {...pageProps} />)
+                              )
+                            }
+                          </AuthConsumer>
+                        </SnackbarProvider>
                       </RTL>
                     </ThemeProvider>
                   )}

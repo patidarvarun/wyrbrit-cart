@@ -2,14 +2,13 @@ import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyB3hLtCicT2IZfkbI7BjDQXKjJmLGV_elQ",
-  authDomain: "wyrbritshop.firebaseapp.com",
-  databaseURL: "https://wyrbritshop-default-rtdb.firebaseio.com",
-  projectId: "wyrbritshop",
-  storageBucket: "wyrbritshop.appspot.com",
-  messagingSenderId: "573257655209",
-  appId: "1:573257655209:web:133dffa370a06cd9bedab8",
-  measurementId: "G-M63N0VEX7S",
+  apiKey: "AIzaSyBExAN7W9NrLhEMp-h1ezqOa7A9QrHdGMw",
+  authDomain: "wyrbrit-shop.firebaseapp.com",
+  projectId: "wyrbrit-shop",
+  storageBucket: "wyrbrit-shop.appspot.com",
+  messagingSenderId: "94743544547",
+  appId: "1:94743544547:web:8fc49b02edcdaff28afbd6",
+  measurementId: "G-FD3X5QBLGC",
 };
 
 export const app = initializeApp(firebaseConfig);

@@ -170,7 +170,7 @@ const Login = (props) => {
                     </form>
                   </Box>
                   <Divider sx={{ my: 3 }} />
-                  <Link color="textSecondary" href="#" variant="body2">
+                  <Link color="textSecondary" href="/register" variant="body2">
                     Create new account
                   </Link>
                 </CardContent>

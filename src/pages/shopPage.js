@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Box from "@mui/material/Box";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
@@ -9,6 +9,7 @@ import { MainNavbar } from "../components/main-navbar";
 import { styled } from "@mui/material/styles";
 import Paper from "@mui/material/Paper";
 import Grid from "@mui/material/Grid";
+import Link from "next/link";
 
 const Item = styled(Paper)(({ theme }) => ({
   backgroundColor: theme.palette.mode === "dark" ? "#1A2027" : "#fff",
@@ -18,12 +19,19 @@ const Item = styled(Paper)(({ theme }) => ({
   color: theme.palette.text.secondary,
 }));
 const ShopPage = () => {
-  const cat = categories();
-  const prod = productss();
   const [category, setCategory] = useState("");
   const [product, setProduct] = useState("");
-  cat.then((data) => setCategory(data.data));
-  prod.then((data) => setProduct(data.data));
+
+  function prodDetail() {
+    const prod = productss();
+    const cat = categories();
+    prod.then((data) => setProduct(data.data));
+    cat.then((data) => setCategory(data.data));
+  }
+
+  useEffect(() => {
+    prodDetail();
+  }, []);
 
   return (
     <div>
@@ -61,19 +69,23 @@ const ShopPage = () => {
                 product.map((item) => (
                   <>
                     <Grid item xs={4}>
-                      <img
-                        style={{ width: "260px", height: "180px" }}
-                        src={`${
-                          item?.images[0]?.src
-                            ? item.images[0]?.src
-                            : "/default.jpg"
-                        }`}
-                        alt={item?.images[0]?.name ? item.images[0]?.name : ""}
-                        loading="lazy"
-                      />
-                      <p style={{ marginLeft: "93px", fontWeight: "600" }}>
-                        {item?.name}
-                      </p>
+                      <a href={"/product/" + item.slug}>
+                        <img
+                          style={{ width: "260px", height: "180px" }}
+                          src={`${
+                            item?.images[0]?.src
+                              ? item.images[0]?.src
+                              : "/default.jpg"
+                          }`}
+                          alt={
+                            item?.images[0]?.name ? item.images[0]?.name : ""
+                          }
+                          loading="lazy"
+                        />
+                        <p style={{ marginLeft: "93px", fontWeight: "600" }}>
+                          {item?.name}
+                        </p>
+                      </a>
                       <p style={{ marginLeft: "115px" }}>
                         {item?.price ? `$${item.price}` : ""}
                       </p>
