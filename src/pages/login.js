@@ -10,7 +10,6 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { MainNavbar } from "../components/main-navbar";
 import { gql } from "apollo-boost";
 import { useMutation } from "@apollo/react-hooks";
 import Router from "next/router";
@@ -19,6 +18,7 @@ import { useSettings } from "../../src/hooks/use-settings";
 import { Moon as MoonIcon } from "../../src/icons/moon";
 import { Sun as SunIcon } from "../../src/icons/sun";
 import { createTheme } from "../../src/theme";
+import { CommonHeader } from "../components/commonHeader";
 
 const Login = (props) => {
   const { element, name, ...other } = props;
@@ -74,7 +74,7 @@ const Login = (props) => {
   }
   return (
     <>
-      <MainNavbar />
+      <CommonHeader />
       <br />
       <br />
       <Card variant="outlined" sx={{ mb: 8 }} {...other}>

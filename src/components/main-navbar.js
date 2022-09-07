@@ -63,9 +63,9 @@ export const MainNavbar = (props) => {
               },
             }}
           >
-            <NextLink href="/shopPage" passHref>
+            <NextLink href="/shop" passHref>
               <Link color="textSecondary" underline="none" variant="subtitle2">
-                ShopPage
+                Shop
               </Link>
             </NextLink>{" "}
             &emsp;

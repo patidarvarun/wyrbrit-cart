@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { collection, getDocs } from "firebase/firestore";
 import { database } from "../../firebase/ firebaseConfig";
-import { MainNavbar } from "../components/main-navbar";
+import { CommonHeader } from "../components/commonHeader";
 
 const dbInstance = collection(database, "users");
 
@@ -21,7 +21,7 @@ const AccountPage = () => {
 
   return (
     <>
-      <MainNavbar />
+      <CommonHeader />
       <br />
       <br />
       <h1 style={{ textAlign: "center" }}>Account Page</h1>

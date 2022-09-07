@@ -5,8 +5,8 @@ import ListItem from "@mui/material/ListItem";
 import ListItemButton from "@mui/material/ListItemButton";
 import categories from "../data/wooCommerce/category";
 import productss from "../data/wooCommerce/products";
-import { MainNavbar } from "../components/main-navbar";
 import { styled } from "@mui/material/styles";
+import { CommonHeader } from "../components/commonHeader";
 import Paper from "@mui/material/Paper";
 import Grid from "@mui/material/Grid";
 import Link from "next/link";
@@ -18,7 +18,8 @@ const Item = styled(Paper)(({ theme }) => ({
   textAlign: "center",
   color: theme.palette.text.secondary,
 }));
-const ShopPage = () => {
+
+const Shop = () => {
   const [category, setCategory] = useState("");
   const [product, setProduct] = useState("");
 
@@ -35,7 +36,7 @@ const ShopPage = () => {
 
   return (
     <div>
-      <MainNavbar />
+      <CommonHeader />
       <br />
       <br />
       <Box sx={{ flexGrow: 1 }}>
@@ -45,17 +46,21 @@ const ShopPage = () => {
               <h3>Categories</h3>
               <nav aria-label="main mailbox folders">
                 {category &&
-                  category.map((data) => (
-                    <>
-                      <List>
-                        <ListItem>
-                          <ListItemButton>
-                            <p>{data.name}</p>
-                          </ListItemButton>
-                        </ListItem>
-                      </List>
-                    </>
-                  ))}
+                  category.map((data) =>
+                    data?.parent === 0 ? (
+                      <>
+                        <List>
+                          <ListItem>
+                            <ListItemButton>
+                              <p>{data.name}</p>
+                            </ListItemButton>
+                          </ListItem>
+                        </List>
+                      </>
+                    ) : (
+                      ""
+                    )
+                  )}
               </nav>
             </Item>
           </Grid>
@@ -69,23 +74,25 @@ const ShopPage = () => {
                 product.map((item) => (
                   <>
                     <Grid item xs={4}>
-                      <a href={"/product/" + item.slug}>
-                        <img
-                          style={{ width: "260px", height: "180px" }}
-                          src={`${
-                            item?.images[0]?.src
-                              ? item.images[0]?.src
-                              : "/default.jpg"
-                          }`}
-                          alt={
-                            item?.images[0]?.name ? item.images[0]?.name : ""
-                          }
-                          loading="lazy"
-                        />
-                        <p style={{ marginLeft: "93px", fontWeight: "600" }}>
-                          {item?.name}
-                        </p>
-                      </a>
+                      <Link href={"/product/" + item.slug}>
+                        <a>
+                          <img
+                            style={{ width: "260px", height: "180px" }}
+                            src={`${
+                              item?.images[0]?.src
+                                ? item.images[0]?.src
+                                : "/default.jpg"
+                            }`}
+                            alt={
+                              item?.images[0]?.name ? item.images[0]?.name : ""
+                            }
+                            loading="lazy"
+                          />
+                          <p style={{ marginLeft: "93px", fontWeight: "600" }}>
+                            {item?.name}
+                          </p>
+                        </a>
+                      </Link>
                       <p style={{ marginLeft: "115px" }}>
                         {item?.price ? `$${item.price}` : ""}
                       </p>
@@ -100,4 +107,4 @@ const ShopPage = () => {
   );
 };
 
-export default ShopPage;
+export default Shop;

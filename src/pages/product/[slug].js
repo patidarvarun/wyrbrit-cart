@@ -1,23 +1,20 @@
 import React, { useEffect, useState } from "react";
-import { MainNavbar } from "../../components/main-navbar";
-import Box from "@mui/material/Box";
-import List from "@mui/material/List";
-import ListItem from "@mui/material/ListItem";
-import ListItemButton from "@mui/material/ListItemButton";
 import productDetail from "../../data/wooCommerce/productDetails";
 import { styled } from "@mui/material/styles";
 import Paper from "@mui/material/Paper";
 import Grid from "@mui/material/Grid";
 import { useRouter } from "next/router";
+import { CommonHeader } from "../../components/commonHeader";
+import Typography from "@mui/material/Typography";
+import ButtonBase from "@mui/material/ButtonBase";
+import { Button } from "@mui/material";
 
-const Item = styled(Paper)(({ theme }) => ({
-  backgroundColor: theme.palette.mode === "dark" ? "#1A2027" : "#fff",
-  ...theme.typography.body2,
-  padding: theme.spacing(1),
-  textAlign: "center",
-  color: theme.palette.text.secondary,
-}));
-
+const Img = styled("img")({
+  margin: "auto",
+  display: "block",
+  maxWidth: "100%",
+  maxHeight: "100%",
+});
 function product() {
   const router = useRouter();
   const { slug } = router.query;
@@ -35,45 +32,98 @@ function product() {
     proDetail();
   }, [slug]);
 
-  console.log("product@@@@@@@@2", product);
   return (
     <>
-      <MainNavbar />
+      <CommonHeader />
       <br />
       <br />
-      <Box sx={{ flexGrow: 1 }}>
-        <Grid container spacing={2}>
-          <Grid item xs={12}>
-            <Item>
-              <h3>Products</h3>
-            </Item>
-            {product &&
-              product.map((data) => (
-                <Grid container spacing={3}>
-                  <>
-                    <Grid item xs={4}>
-                      {data &&
-                        data.images.map((image) => (
-                          <img
-                            style={{ width: "400px", height: "400px" }}
-                            src={image && image.src}
-                            alt={product.name}
-                            loading="lazy"
-                          />
-                        ))}
-                      <p style={{ marginLeft: "93px", fontWeight: "600" }}>
-                        {data.name}
-                      </p>
-                      <p style={{ marginLeft: "115px" }}>
-                        {data.price ? `$${data.price}` : ""}
-                      </p>
+      <br />
+      <br />
+      <Paper
+        sx={{
+          p: 2,
+          margin: "auto",
+          width: "100%",
+          maxWidth: 800,
+          flexGrow: 1,
+          backgroundColor: (theme) =>
+            theme.palette.mode === "dark" ? "#1A2027" : "#fff",
+        }}
+      >
+        {product &&
+          product.map(
+            (data) => (
+              console.log("############data", data),
+              (
+                <Grid container spacing={2} key={data.id}>
+                  <Grid item>
+                    <ButtonBase sx={{ width: 300, height: 300 }}>
+                      <Img alt="complex" src={data?.images[0].src} />
+                    </ButtonBase>
+                  </Grid>
+                  <Grid item xs={12} sm container>
+                    <Grid item xs container direction="column" spacing={2}>
+                      <Grid item xs>
+                        <Typography
+                          gutterBottom
+                          variant="subtitle1"
+                          component="div"
+                        >
+                          {data.name}
+                        </Typography>
+                        <Typography variant="body2" gutterBottom>
+                          Price : {data.price === "" ? "" : `$${data.price}`}
+                        </Typography>
+                        <Typography variant="body2" gutterBottom>
+                          {data.short_description.replace(/<(.|\n)*?>/g, "")}
+                        </Typography>
+                        <br />
+                        <Button size="large" sx={{ mr: 3 }} variant="contained">
+                          Add to cart
+                        </Button>{" "}
+                        &nbsp;
+                        {/* {data?.categories?.map((cat) => ( */}
+                        <>
+                          <Button
+                            size="large"
+                            sx={{ mr: 3 }}
+                            variant="contained"
+                          >
+                            Select Size
+                          </Button>
+                        </>
+                        {/* ))} */}
+                        <br />
+                        <br />
+                        <Typography variant="body2" gutterBottom>
+                          SKU : {data.sku}
+                        </Typography>
+                        <Typography variant="body2" gutterBottom>
+                          Categories :{" "}
+                          {data.categories.map((cat) => (
+                            <div key={cat.id}>{cat.name}</div>
+                          ))}
+                        </Typography>
+                      </Grid>
+                      <Grid item>
+                        <Typography
+                          gutterBottom
+                          variant="subtitle1"
+                          component="div"
+                        >
+                          Description
+                        </Typography>
+                        <Typography sx={{ cursor: "pointer" }} variant="body2">
+                          {data.description.replace(/<(.|\n)*?>/g, "")}
+                        </Typography>
+                      </Grid>
                     </Grid>
-                  </>
+                  </Grid>
                 </Grid>
-              ))}
-          </Grid>
-        </Grid>
-      </Box>
+              )
+            )
+          )}
+      </Paper>
     </>
   );
 }

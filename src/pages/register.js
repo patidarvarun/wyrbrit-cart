@@ -7,12 +7,12 @@ import {
   Checkbox,
   Container,
   Divider,
+  FormControl,
   Link,
   TextField,
   Typography,
 } from "@mui/material";
-
-import { MainNavbar } from "../components/main-navbar";
+import Loader from "../components/common/loader";
 import wooCredential from "../data/wooCommerce/wooCredentialKey";
 import { CardHeader, IconButton, ThemeProvider, AppBar } from "@mui/material";
 import { useSettings } from "../../src/hooks/use-settings";
@@ -23,19 +23,24 @@ import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
 import country from "../data/wooCommerce/countries";
 import Select from "@mui/material/Select";
-import { useSnackbar, VariantType } from "notistack";
+import { CommonHeader } from "../components/commonHeader";
+import Snackbar from "@mui/material/Snackbar";
+import MuiAlert from "@mui/material/Alert";
+
+const Alert = React.forwardRef(function Alert(props, ref) {
+  return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+});
 
 function register(props) {
-  const { enqueueSnackbar } = useSnackbar();
   const { element, name, ...other } = props;
   const { settings } = useSettings();
   const [selectedTheme, setSelectedTheme] = useState(settings.theme);
   const wooapi = wooCredential();
-
+  const [loading, setLoading] = useState(false);
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
-  // const [password, setPassword] = useState("");
+  const [password, setPassword] = useState("");
   const [address1, setAddress1] = useState("");
   const [address2, setAddress2] = useState("");
   const [city, setCity] = useState("");
@@ -45,18 +50,15 @@ function register(props) {
   const [stateData, setStateData] = useState("");
   const [stateDatas, setStateDatas] = useState("");
   const [phone, setPhone] = useState("");
+  const [open, setOpen] = React.useState(false);
 
   function countr() {
     const countries = country();
     countries.then((data) => setCountry(data.data));
   }
 
-  function handleCountry(data) {
-    setStateData(data);
-    setCountryy(data.name);
-  }
-  function handleState(data) {
-    setStateDatas(data.name);
+  function handleState(e) {
+    setStateDatas(e.target.value);
   }
   useEffect(() => {
     countr();
@@ -69,6 +71,12 @@ function register(props) {
     });
   };
 
+  const handleCountry = (e) => {
+    setCountryy(e.target.value);
+    Country.filter((item) =>
+      item.name === e.target.value ? setStateData(item.states) : ""
+    );
+  };
   const theme = createTheme({
     ...settings,
     mode: selectedTheme,
@@ -81,6 +89,7 @@ function register(props) {
       first_name: firstName,
       last_name: lastName,
       username: email,
+      password: password,
       billing: {
         first_name: firstName,
         last_name: lastName,
@@ -93,25 +102,30 @@ function register(props) {
         phone: phone,
       },
     };
-
+    setLoading(true);
     const response = await wooapi.post("customers", handleData).then((data) => {
       if (data?.status === 201) {
-        enqueueSnackbar("User Register Successfully!", {
-          VariantType: "success",
-        });
+        setLoading(false);
+        setOpen(true);
         setTimeout(() => {
           window.location.replace("/login");
         }, 2000);
       } else if (data?.status === 400) {
-        console.log("error");
-        enqueueSnackbar("Something went wrong!", "error");
+        console.log("error@@@@@@@@@@@@@@@@");
       }
     });
+  };
+  const handleClose = (event, reason) => {
+    if (reason === "clickaway") {
+      return;
+    }
+
+    setOpen(false);
   };
 
   return (
     <>
-      <MainNavbar />
+      <CommonHeader />
       <br />
       <br />
       <Card variant="outlined" sx={{ mb: 8 }} {...other}>
@@ -200,14 +214,14 @@ function register(props) {
                         onChange={(e) => setEmail(e.target.value)}
                         type="email"
                       />
-                      {/* <TextField
+                      <TextField
                         fullWidth
                         label="Password"
                         margin="normal"
                         name="password"
-                        onChange={(e) => setPassword(e.target.value)}
                         type="password"
-                      /> */}
+                        onChange={(e) => setPassword(e.target.value)}
+                      />
                       <TextField
                         fullWidth
                         label="Address 1"
@@ -230,28 +244,29 @@ function register(props) {
                         onChange={(e) => setCity(e.target.value)}
                       />
                       <InputLabel id="demo-select-small">Country</InputLabel>
-                      <Select
-                        labelId="demo-select-small"
-                        id="demo-select-small"
-                        value={countryy}
-                        label="Country"
-                        //  onChange={(e) => setCountryy(e.target.value)}
+                      <FormControl
+                        fullWidth
+                        className="filter ml-0 w-100 country"
                       >
-                        {Country &&
-                          Country.map((data) => (
-                            <>
-                              <MenuItem value=""></MenuItem>
-                              <MenuItem
-                                value={data.name}
-                                onClick={() => handleCountry(data)}
-                              >
-                                {data.name}
-                              </MenuItem>
-                            </>
-                          ))}
-                      </Select>
+                        <Select
+                          labelId="demo-simple-select-helper-label"
+                          id="demo-simple-select-helper"
+                          value={countryy}
+                          label="country"
+                          onChange={handleCountry}
+                        >
+                          {Country &&
+                            Country.map((item) => {
+                              return (
+                                <MenuItem key={item.name} value={item.name}>
+                                  {item.name}
+                                </MenuItem>
+                              );
+                            })}
+                        </Select>
+                      </FormControl>
                       <InputLabel id="demo-select-small">State</InputLabel>
-                      {stateData && stateData?.states?.length === 0 ? (
+                      {stateData && stateData.length === 0 ? (
                         <TextField
                           fullWidth
                           label=""
@@ -260,23 +275,27 @@ function register(props) {
                           onChange={(e) => setState(e.target.value)}
                         />
                       ) : (
-                        <Select
-                          labelId="demo-select-small"
-                          id="demo-select-small"
-                          value={stateDatas}
-                          label="Country"
-                          // onChange={(e) => setState(e.target.value)}
+                        <FormControl
+                          fullWidth
+                          className="filter ml-0 w-100 country"
                         >
-                          {stateData &&
-                            stateData?.states?.map((data) => (
-                              <>
-                                <MenuItem value=""></MenuItem>
-                                <MenuItem onClick={() => handleState(data)}>
-                                  {data.name}
-                                </MenuItem>
-                              </>
-                            ))}
-                        </Select>
+                          <Select
+                            labelId="demo-simple-select-helper-label"
+                            id="demo-simple-select-helper"
+                            value={stateDatas}
+                            label="country"
+                            onChange={handleState}
+                          >
+                            {stateData &&
+                              stateData.map((item) => {
+                                return (
+                                  <MenuItem key={item.name} value={item.name}>
+                                    {item.name}
+                                  </MenuItem>
+                                );
+                              })}
+                          </Select>
+                        </FormControl>
                       )}
                       <TextField
                         fullWidth
@@ -300,14 +319,18 @@ function register(props) {
                         </Typography>
                       </Box>
                       <Box sx={{ mt: 2 }}>
-                        <Button
-                          fullWidth
-                          size="large"
-                          type="submit"
-                          variant="contained"
-                        >
-                          Register
-                        </Button>
+                        {!loading ? (
+                          <Button
+                            fullWidth
+                            size="large"
+                            type="submit"
+                            variant="contained"
+                          >
+                            Register
+                          </Button>
+                        ) : (
+                          <Loader />
+                        )}
                       </Box>
                     </form>
                   </Box>
@@ -315,6 +338,19 @@ function register(props) {
                   <Link color="textSecondary" href="/login" variant="body2">
                     Already having an account
                   </Link>
+                  <Snackbar
+                    open={open}
+                    autoHideDuration={6000}
+                    onClose={handleClose}
+                  >
+                    <Alert
+                      onClose={handleClose}
+                      severity="success"
+                      sx={{ width: "100%" }}
+                    >
+                      User Register Successfully!
+                    </Alert>
+                  </Snackbar>
                 </CardContent>
               </Card>
             </Container>
