@@ -111,7 +111,11 @@ function register(props) {
           window.location.replace("/login");
         }, 2000);
       } else if (data?.status === 400) {
+        console.log("!!!!!!!!!!!", data);
+        setOpen(false);
         console.log("error@@@@@@@@@@@@@@@@");
+      } else {
+        console.log("$$$$$$$$$$$", data);
       }
     });
   };
