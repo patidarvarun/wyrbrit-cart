@@ -14,18 +14,13 @@ const Item = styled(Paper)(({ theme }) => ({
 }));
 
 function SizeChart(props) {
-  console.log("Size ", props);
+  //   console.log("Size ", props);
   return (
-    <Box sx={{ width: "95%", typography: "body1" }}>
+    <Box sx={{ width: "100%", typography: "body1" }}>
       <TabPanel value="1">
         {props.name1} &emsp;&emsp;&emsp; <a>{props.name2}</a>
       </TabPanel>
-      <Grid
-        container
-        rowSpacing={1}
-        columnSpacing={{ xs: 1, sm: 2, md: 3 }}
-        
-      >
+      <Grid container rowSpacing={1} columnSpacing={{ xs: 1, sm: 2, md: 3 }}>
         <Grid item xs={3} style={{ width: "25% !important" }}>
           <Item>1</Item>
         </Grid>

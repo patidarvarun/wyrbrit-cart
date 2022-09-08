@@ -9,6 +9,7 @@ import Typography from "@mui/material/Typography";
 import ButtonBase from "@mui/material/ButtonBase";
 import { Button } from "@mui/material";
 import Link from "next/link";
+import { Context } from "../context";
 
 const Img = styled("img")({
   margin: "auto",
@@ -25,7 +26,9 @@ function product() {
     const products = productDetail(slug);
     products.then((data) => setProduct(data.data));
   }
-
+  function handleDataSet(data) {
+    localStorage.setItem("item", JSON.stringify(data.slug));
+  }
   useEffect(() => {
     if (!slug) {
       return;
@@ -83,19 +86,20 @@ function product() {
                           Add to cart
                         </Button>{" "}
                         &nbsp;
-                        {/* {data?.categories?.map((cat) => ( */}
-                        <>
-                          <Link href="/inputForm">
-                            <Button
-                              size="large"
-                              sx={{ mr: 3 }}
-                              variant="contained"
-                            >
-                              Select Size
-                            </Button>
-                          </Link>
-                        </>
-                        {/* ))} */}
+                        {data?.categories?.map((cat) => (
+                          <>
+                            <Link href="/inputForm">
+                              <Button
+                                size="large"
+                                sx={{ mr: 3 }}
+                                variant="contained"
+                                onClick={() => handleDataSet(cat)}
+                              >
+                                Select Size
+                              </Button>
+                            </Link>
+                          </>
+                        ))}
                         <br />
                         <br />
                         <Typography variant="body2" gutterBottom>
@@ -104,7 +108,9 @@ function product() {
                         <Typography variant="body2" gutterBottom>
                           Categories :{" "}
                           {data.categories.map((cat) => (
-                            <div key={cat.id}>{cat.name}</div>
+                            <Context.Provider value={cat}>
+                              <div key={cat.id}>{cat.name}</div>
+                            </Context.Provider>
                           ))}
                         </Typography>
                       </Grid>

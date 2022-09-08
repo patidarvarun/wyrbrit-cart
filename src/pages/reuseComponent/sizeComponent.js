@@ -8,7 +8,7 @@ import SizeChart from "./sizeChart";
 
 const SizeComponent = (props) => {
   const [value, setValue] = React.useState("1");
-  console.log("@@@@", props);
+  //   console.log("@@@@", props);
   const handleChange = (event, newValue) => {
     setValue(newValue);
   };

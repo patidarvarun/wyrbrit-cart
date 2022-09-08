@@ -1,110 +1,148 @@
 import React, { useState, useEffect } from "react";
-import Box from "@mui/material/Box";
-import List from "@mui/material/List";
-import ListItem from "@mui/material/ListItem";
-import ListItemButton from "@mui/material/ListItemButton";
-import categories from "../data/wooCommerce/category";
-import productss from "../data/wooCommerce/products";
-import { styled } from "@mui/material/styles";
+import { Box, Card, Divider, Typography } from "@mui/material";
+import { CardHeader, IconButton, ThemeProvider, AppBar } from "@mui/material";
+import { useSettings } from "../../src/hooks/use-settings";
+import { Moon as MoonIcon } from "../../src/icons/moon";
+import { Sun as SunIcon } from "../../src/icons/sun";
+import { createTheme } from "../../src/theme";
 import { CommonHeader } from "../components/commonHeader";
-import Paper from "@mui/material/Paper";
-import Grid from "@mui/material/Grid";
+import { CardMedia, Grid } from "@mui/material";
+import productss from "../data/wooCommerce/products";
 import Link from "next/link";
 
-const Item = styled(Paper)(({ theme }) => ({
-  backgroundColor: theme.palette.mode === "dark" ? "#1A2027" : "#fff",
-  ...theme.typography.body2,
-  padding: theme.spacing(1),
-  textAlign: "center",
-  color: theme.palette.text.secondary,
-}));
-
-const Shop = () => {
-  const [category, setCategory] = useState("");
+const Shop = (props) => {
+  const { element, name, ...other } = props;
+  const { settings } = useSettings();
+  const [selectedTheme, setSelectedTheme] = useState(settings.theme);
   const [product, setProduct] = useState("");
 
   function prodDetail() {
     const prod = productss();
-    const cat = categories();
     prod.then((data) => setProduct(data.data));
-    cat.then((data) => setCategory(data.data));
   }
 
   useEffect(() => {
     prodDetail();
   }, []);
+  useEffect(() => {
+    setSelectedTheme(settings.theme);
+  }, [settings.theme]);
+
+  const handleSwitch = () => {
+    setSelectedTheme((prevSelectedTheme) => {
+      return prevSelectedTheme === "light" ? "dark" : "light";
+    });
+  };
+
+  const theme = createTheme({
+    ...settings,
+    mode: selectedTheme,
+  });
 
   return (
-    <div>
+    <>
       <CommonHeader />
       <br />
       <br />
-      <Box sx={{ flexGrow: 1 }}>
-        <Grid container spacing={2}>
-          <Grid item xs={3}>
-            <Item>
-              <h3>Categories</h3>
-              <nav aria-label="main mailbox folders">
-                {category &&
-                  category.map((data) =>
-                    data?.parent === 0 ? (
-                      <>
-                        <List>
-                          <ListItem>
-                            <ListItemButton>
-                              <p>{data.name}</p>
-                            </ListItemButton>
-                          </ListItem>
-                        </List>
-                      </>
-                    ) : (
-                      ""
-                    )
-                  )}
-              </nav>
-            </Item>
-          </Grid>
-          <Grid item xs={9}>
-            <Item>
-              <h3>Products</h3>
-            </Item>
-            {/* <h1>Shop Page</h1> */}
+      <Card variant="outlined" sx={{ mb: 8 }} {...other}>
+        <CardHeader
+          action={
+            <IconButton onClick={handleSwitch}>
+              {selectedTheme === "light" ? (
+                <MoonIcon fontSize="small" />
+              ) : (
+                <SunIcon fontSize="small" />
+              )}
+            </IconButton>
+          }
+          title={name}
+        />
+        <Divider />
+        <ThemeProvider theme={theme}>
+          <Box
+            sx={{
+              backgroundColor: "background.default",
+              minHeight: "100%",
+              p: 3,
+            }}
+          >
             <Grid container spacing={3}>
               {product &&
                 product.map((item) => (
-                  <>
-                    <Grid item xs={4}>
-                      <Link href={"/product/" + item.slug}>
-                        <a>
-                          <img
-                            style={{ width: "260px", height: "180px" }}
-                            src={`${
-                              item?.images[0]?.src
-                                ? item.images[0]?.src
-                                : "/default.jpg"
-                            }`}
-                            alt={
-                              item?.images[0]?.name ? item.images[0]?.name : ""
-                            }
-                            loading="lazy"
-                          />
-                          <p style={{ marginLeft: "93px", fontWeight: "600" }}>
-                            {item?.name}
-                          </p>
-                        </a>
-                      </Link>
-                      <p style={{ marginLeft: "115px" }}>
-                        {item?.price ? `$${item.price}` : ""}
-                      </p>
-                    </Grid>
-                  </>
+                  <Grid item key={item.slug} md={4} xs={12}>
+                    <Card>
+                      <Box sx={{ p: 2 }}>
+                        <Link href={"/product/" + item.slug}>
+                          <a>
+                            <CardMedia
+                              image={
+                                item?.images[0]?.src
+                                  ? item.images[0]?.src
+                                  : "/default.jpg"
+                              }
+                              sx={{
+                                backgroundColor: "background.default",
+                                height: 200,
+                              }}
+                            />
+                          </a>
+                        </Link>
+                        <Box
+                          sx={{
+                            alignItems: "center",
+                            display: "flex",
+                            mt: 2,
+                          }}
+                        >
+                          <Box sx={{ ml: 2 }}>
+                            <Link
+                              href={"/product/" + item.slug}
+                              color="textPrimary"
+                              variant="h6"
+                            >
+                              {item.name}
+                            </Link>
+                          </Box>
+                        </Box>
+                      </Box>
+                      <Box
+                        sx={{
+                          pb: 2,
+                          px: 3,
+                        }}
+                      >
+                        <Typography color="textSecondary" variant="body2">
+                          {item.short_description.replace(/<(.|\n)*?>/g, "")}
+                        </Typography>
+                      </Box>
+                      <Box
+                        sx={{
+                          px: 3,
+                          py: 2,
+                        }}
+                      >
+                        <Grid
+                          alignItems="center"
+                          container
+                          justifyContent="space-between"
+                          spacing={3}
+                        >
+                          <Grid item>
+                            <Typography variant="subtitle2">
+                              {item?.price ? `$${item.price}` : ""}
+                            </Typography>
+                          </Grid>
+                        </Grid>
+                      </Box>
+                      <Divider />
+                    </Card>
+                  </Grid>
                 ))}
             </Grid>
-          </Grid>
-        </Grid>
-      </Box>
-    </div>
+          </Box>
+        </ThemeProvider>
+      </Card>
+    </>
   );
 };
-
 export default Shop;
