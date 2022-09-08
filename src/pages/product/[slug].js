@@ -8,6 +8,7 @@ import { CommonHeader } from "../../components/commonHeader";
 import Typography from "@mui/material/Typography";
 import ButtonBase from "@mui/material/ButtonBase";
 import { Button } from "@mui/material";
+import Link from "next/link";
 
 const Img = styled("img")({
   margin: "auto",
@@ -84,13 +85,15 @@ function product() {
                         &nbsp;
                         {/* {data?.categories?.map((cat) => ( */}
                         <>
-                          <Button
-                            size="large"
-                            sx={{ mr: 3 }}
-                            variant="contained"
-                          >
-                            Select Size
-                          </Button>
+                          <Link href="/inputForm">
+                            <Button
+                              size="large"
+                              sx={{ mr: 3 }}
+                              variant="contained"
+                            >
+                              Select Size
+                            </Button>
+                          </Link>
                         </>
                         {/* ))} */}
                         <br />

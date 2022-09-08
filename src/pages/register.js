@@ -51,6 +51,8 @@ function register(props) {
   const [stateDatas, setStateDatas] = useState("");
   const [phone, setPhone] = useState("");
   const [open, setOpen] = React.useState(false);
+  const [openError, setOpenError] = React.useState(false);
+  const [openWarning, setOpenWarning] = React.useState(false);
 
   function countr() {
     const countries = country();
@@ -102,29 +104,47 @@ function register(props) {
         phone: phone,
       },
     };
-    setLoading(true);
-    const response = await wooapi.post("customers", handleData).then((data) => {
-      if (data?.status === 201) {
+    if (
+      (email === "",
+      firstName === "",
+      lastName === "",
+      email === "",
+      password === "",
+      address1 === "",
+      address2 === "",
+      city === "")
+    ) {
+      setOpenWarning(true);
+    } else {
+      try {
+        setLoading(true);
+        const response = await wooapi
+          .post("customers", handleData)
+          .then((data) => {
+            if (data.status === 201) {
+              setLoading(false);
+              setOpen(true);
+              setTimeout(() => {
+                window.location.replace("/login");
+              }, 2000);
+            } else {
+              console.log("data", data);
+            }
+          });
+      } catch (error) {
+        console.log("error", error.response);
+        setOpenError(true);
         setLoading(false);
-        setOpen(true);
-        setTimeout(() => {
-          window.location.replace("/login");
-        }, 2000);
-      } else if (data?.status === 400) {
-        console.log("!!!!!!!!!!!", data);
-        setOpen(false);
-        console.log("error@@@@@@@@@@@@@@@@");
-      } else {
-        console.log("$$$$$$$$$$$", data);
       }
-    });
+    }
   };
   const handleClose = (event, reason) => {
     if (reason === "clickaway") {
       return;
     }
-
+    setOpenError(false);
     setOpen(false);
+    setOpenWarning(false);
   };
 
   return (
@@ -353,6 +373,32 @@ function register(props) {
                       sx={{ width: "100%" }}
                     >
                       User Register Successfully!
+                    </Alert>
+                  </Snackbar>
+                  <Snackbar
+                    open={openError}
+                    autoHideDuration={6000}
+                    onClose={handleClose}
+                  >
+                    <Alert
+                      onClose={handleClose}
+                      severity="error"
+                      sx={{ width: "100%" }}
+                    >
+                      Something went wrong...
+                    </Alert>
+                  </Snackbar>
+                  <Snackbar
+                    open={openWarning}
+                    autoHideDuration={6000}
+                    onClose={handleClose}
+                  >
+                    <Alert
+                      onClose={handleClose}
+                      severity="warning"
+                      sx={{ width: "100%" }}
+                    >
+                      All fields are required!
                     </Alert>
                   </Snackbar>
                 </CardContent>
