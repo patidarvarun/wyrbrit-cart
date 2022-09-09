@@ -9,9 +9,12 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogActions from "@mui/material/DialogActions";
 import IconButton from "@mui/material/IconButton";
 import CloseIcon from "@mui/icons-material/Close";
-import SizeComponent from "./reuseComponent/sizeComponent";
-import Loader from "../components/common/loader";
-import { Practice } from "./product/[slug]";
+import Box from "@mui/material/Box";
+import Grid from "@mui/material/Grid";
+import Tab from "@mui/material/Tab";
+import TabContext from "@mui/lab/TabContext";
+import TabList from "@mui/lab/TabList";
+import TabPanel from "@mui/lab/TabPanel";
 import {
   doc,
   getDoc,
@@ -20,8 +23,7 @@ import {
   where,
   getDocs,
 } from "firebase/firestore";
-import { database } from "../../firebase/ firebaseConfig";
-import { Context } from "./context";
+import { database } from "../../../firebase/ firebaseConfig";
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
   "& .MuiDialogContent-root": {
@@ -68,12 +70,16 @@ BootstrapDialogTitle.propTypes = {
   onClose: PropTypes.func.isRequired,
 };
 
-function inputForm(props) {
+function WithoutReuse(props) {
   const [categoryData, setCategoryData] = useState("");
+  const [measureD, setMeasureD] = useState("");
   const dbInstance = collection(database, "category_unit");
   const dbInstance1 = collection(database, "measurement_unit");
+  const [value, setValue] = React.useState("1");
+  const handleChange = (event, newValue) => {
+    setValue(newValue);
+  };
   const [loading, setLoading] = useState(false);
-
   let slugArray = [];
   let measurementData = [];
   const getNotes = async () => {
@@ -95,26 +101,8 @@ function inputForm(props) {
         console.log("No such document!");
       }
     }
-    console.log("measurementData", measurementData);
+    setMeasureD(measurementData);
   };
-  // const getNo = async () => {
-  //   const q = query(
-  //     dbInstance1,
-  //     where("name", "in", [
-  //       "0VcvajAz44WRKX5JRe51,0sV3iggsDr24bCN08W5A,3KpK1uvZiM0lxjmoJCeh",
-  //     ])
-  //   );
-
-  //   const docs = await getDocs(q);
-  //   const docRef = doc(database, "measurement_unit", "PaBiA3pVc2YtpKngJx9j");
-  //   const docSnap = await getDoc(docRef);
-
-  //   if (docSnap.exists()) {
-  //     console.log("Document data:", docSnap.data());
-  //   } else {
-  //     console.log("No such document!");
-  //   }
-  // };
 
   const [open, setOpen] = React.useState(false);
 
@@ -129,19 +117,24 @@ function inputForm(props) {
     setCategoryData(localStorage.getItem("item"));
     setOpen(true);
     getNotes();
-    // getNo();
   }, []);
 
-  const counter = useContext(Context);
-  // console.log("!!!!!!!!!!!!!", counter);
-
+  const measure = [
+    {
+      name: "Front Shoulder",
+      values: ["12", "12.3", "13", "14"],
+    },
+    {
+      name: "Bicep",
+      values: ["12", "12.3", "13", "14"],
+    },
+    {
+      values: ["12", "12.3", "13", "14"],
+      name: "Back length",
+    },
+  ];
   return (
     <div className="">
-      <Practice.Consumer>
-        {(fname) => {
-          return console.log("fname", fname);
-        }}
-      </Practice.Consumer>
       <style global jsx>{`
         .MuiPaper-root.MuiPaper-elevation.MuiPaper-rounded.MuiPaper-elevation24.MuiDialog-paper.MuiDialog-paperScrollPaper.MuiDialog-paperWidthSm.css-bclhn9-MuiPaper-root-MuiDialog-paper {
           width: 50%;
@@ -150,7 +143,6 @@ function inputForm(props) {
           height: 32em;
         }
       `}</style>
-      {/* {!loading ? ( */}
       <BootstrapDialog
         onClose={handleClose}
         aria-labelledby="customized-dialog-title"
@@ -161,23 +153,47 @@ function inputForm(props) {
           onClose={handleClose}
         ></BootstrapDialogTitle>
         <DialogContent dividers>
-          {console.log("$$$$$$$$$$$$$$$$", measurementData)}
-
-          <SizeComponent
-            label1={
-              categoryData.replace(/['"]+/g, "") === "shirts"
-                ? ""
-                : categoryData.replace(/['"]+/g, "")
-            }
-            lebel2={
-              categoryData.replace(/['"]+/g, "") === "shirts"
-                ? ""
-                : categoryData.replace(/['"]+/g, "")
-            }
-            name1={categoryData.replace(/['"]+/g, "") === "shirts"}
-            name2={categoryData.replace(/['"]+/g, "") === "shirts"}
-            measurementData={measurementData && measurementData}
-          />
+          <Box sx={{ width: "100%", typography: "body1" }}>
+            <TabContext value={value}>
+              <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
+                <TabList
+                  onChange={handleChange}
+                  aria-label="lab API tabs example"
+                >
+                  <Tab label={props.label1} value="1" />
+                  <Tab label={props.lebel2} value="2" />
+                </TabList>
+              </Box>
+              <TabPanel value="1">
+                <Box sx={{ width: "100%", typography: "body1" }}>
+                  {measureD &&
+                    measureD.map((data) => (
+                      <>
+                        <TabPanel value="1">
+                          {data.name} &emsp;&emsp;&emsp; <a>{props.name2}</a>
+                        </TabPanel>
+                        <Grid
+                          container
+                          rowSpacing={1}
+                          columnSpacing={{ xs: 1, sm: 2, md: 3 }}
+                        >
+                          {data.values.map((val) => (
+                            <Grid
+                              item
+                              xs={3}
+                              style={{ width: "25% !important" }}
+                            >
+                              <Item>{val}</Item>
+                            </Grid>
+                          ))}
+                        </Grid>
+                      </>
+                    ))}
+                </Box>
+              </TabPanel>
+              <TabPanel value="2">Item Two</TabPanel>
+            </TabContext>
+          </Box>
         </DialogContent>
         <DialogActions>
           <Button autoFocus onClick={handleClose}>
@@ -185,11 +201,8 @@ function inputForm(props) {
           </Button>
         </DialogActions>
       </BootstrapDialog>
-      {/* ) : (
-        <Loader />
-      )} */}
     </div>
   );
 }
 
-export default inputForm;
+export default WithoutReuse;
