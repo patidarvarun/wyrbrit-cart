@@ -8,9 +8,13 @@ import { CommonHeader } from "../../components/commonHeader";
 import Typography from "@mui/material/Typography";
 import ButtonBase from "@mui/material/ButtonBase";
 import { Button } from "@mui/material";
-import Link from "next/link";
-import { Context } from "../context";
-import InputForm from "../inputForm";
+import Dialog from "@mui/material/Dialog";
+import DialogTitle from "@mui/material/DialogTitle";
+import DialogContent from "@mui/material/DialogContent";
+import DialogActions from "@mui/material/DialogActions";
+import IconButton from "@mui/material/IconButton";
+import CloseIcon from "@mui/icons-material/Close";
+import PropTypes from "prop-types";
 import {
   doc,
   getDoc,
@@ -21,70 +25,134 @@ import {
 } from "firebase/firestore";
 import { database } from "../../../firebase/ firebaseConfig";
 import SizeComponent from "../reuseComponent/sizeComponent";
-const Practice = createContext();
+import Loader from "../../components/common/loader";
 
+const DataTransfer = createContext();
 const Img = styled("img")({
   margin: "auto",
   display: "block",
   maxWidth: "100%",
   maxHeight: "100%",
 });
+const BootstrapDialog = styled(Dialog)(({ theme }) => ({
+  "& .MuiDialogContent-root": {
+    padding: theme.spacing(2),
+  },
+  "& .MuiDialogActions-root": {
+    padding: theme.spacing(1),
+  },
+}));
+const Item = styled(Paper)(({ theme }) => ({
+  backgroundColor: theme.palette.mode === "dark" ? "#1A2027" : "#fff",
+  ...theme.typography.body2,
+  padding: theme.spacing(1),
+  textAlign: "center",
+  color: theme.palette.text.secondary,
+}));
+const BootstrapDialogTitle = (props) => {
+  const { children, onClose, ...other } = props;
+
+  return (
+    <DialogTitle sx={{ m: 0, p: 2 }} {...other}>
+      {children}
+      {onClose ? (
+        <IconButton
+          aria-label="close"
+          onClick={onClose}
+          sx={{
+            position: "absolute",
+            right: 8,
+            top: 8,
+            color: (theme) => theme.palette.grey[500],
+          }}
+        >
+          <CloseIcon />
+        </IconButton>
+      ) : null}
+    </DialogTitle>
+  );
+};
+
+BootstrapDialogTitle.propTypes = {
+  children: PropTypes.node,
+  onClose: PropTypes.func.isRequired,
+};
+
 function product() {
   const router = useRouter();
   const { slug } = router.query;
-  let catData = [];
   let slugArray = [];
+  let catArray = [];
+  const [activeTab, setActiveTab] = useState();
+  const [tabArray, setTabArray] = useState([]);
+
   let measurementData = [];
   const [product, setProduct] = useState("");
+  const [category, setCategory] = useState("");
   const dbInstance = collection(database, "category_unit");
+  const [measurementDataa, setMeasurementDataa] = useState("");
+  const [open, setOpen] = React.useState(false);
+  const [loading, setLoading] = useState(false);
 
+  const handleClose = () => {
+    setOpen(false);
+  };
   function proDetail() {
     const products = productDetail(slug);
     products.then((data) => setProduct(data.data));
   }
-
-  // function prod() {
-  //   product &&
-  //     product.map((data) => {
-  //       data.categories.map((cat) => {
-  //         catData.push(cat.slug);
-  //       });
-  //     });
-  // }
-
-  const getNotes = async () => {
+  const getMeasurementData = async () => {
     const data = await getDocs(dbInstance);
     const getData = data.docs.map((doc) => doc.data());
     getData.map((cat) => {
-      if (cat.slug === "shirts") {
-        const docRef = doc(database, "measurement_unit", cat.reference.id);
-        slugArray.push(docRef);
+      if (!tabArray.includes(cat.slug) && cat.slug) {
+        tabArray.push(cat.slug);
       }
+      const docRef = doc(database, "measurement_unit", cat.reference.id);
+      slugArray.push(docRef);
+      catArray.push(cat.slug);
     });
     for (var i = 0; i < slugArray.length; i++) {
       const docSnapp = await getDoc(slugArray[i]);
+      var slugMeasure = docSnapp.data();
+      setActiveTab(catArray[0]);
 
       if (docSnapp.exists()) {
-        measurementData.push(docSnapp.data());
+        measurementData.push({
+          filter: catArray[i],
+          name: slugMeasure.name,
+          values: slugMeasure.values,
+        });
       } else {
         console.log("No such document!");
       }
     }
-    console.log("measurementData", measurementData);
+    setMeasurementDataa(measurementData);
   };
 
   function handleDataSet(data) {
-    localStorage.setItem("item", JSON.stringify(data.slug));
+    setCategory(data.slug);
+    if (measurementDataa.length !== 0) {
+      setOpen(true);
+      setLoading(false);
+    } else {
+      setLoading(true);
+      setTimeout(() => {
+        setLoading(false);
+        setOpen(true);
+      }, 17000);
+    }
   }
+
   useEffect(() => {
     if (!slug) {
       return;
     }
     proDetail();
-    // prod();
   }, [slug]);
+
   useEffect(() => {
-    getNotes();
+    getMeasurementData();
   }, []);
 
   return (
@@ -136,7 +204,7 @@ function product() {
                     &nbsp;
                     {data?.categories?.map((cat) => (
                       <>
-                        <Link href="/inputForm">
+                        {!loading ? (
                           <Button
                             size="large"
                             sx={{ mr: 3 }}
@@ -145,7 +213,9 @@ function product() {
                           >
                             Select Size
                           </Button>
-                        </Link>
+                        ) : (
+                          <Loader />
+                        )}
                       </>
                     ))}
                     <br />
@@ -156,9 +226,7 @@ function product() {
                     <Typography variant="body2" gutterBottom>
                       Categories :{" "}
                       {data.categories.map((cat) => (
-                        <Context.Provider value={cat}>
-                          <div key={cat.id}>{cat.name}</div>
-                        </Context.Provider>
+                        <div key={cat.id}>{cat.name}</div>
                       ))}
                     </Typography>
                   </Grid>
@@ -178,17 +246,47 @@ function product() {
               </Grid>
             </Grid>
           ))}
+        <style global jsx>{`
+          .MuiPaper-root.MuiPaper-elevation.MuiPaper-rounded.MuiPaper-elevation24.MuiDialog-paper.MuiDialog-paperScrollPaper.MuiDialog-paperWidthSm.css-bclhn9-MuiPaper-root-MuiDialog-paper {
+            width: 50%;
+          }
+          .MuiDialog-container.MuiDialog-scrollPaper.css-hz1bth-MuiDialog-container {
+            height: 32em;
+          }
+        `}</style>
+        <BootstrapDialog
+          onClose={handleClose}
+          aria-labelledby="customized-dialog-title"
+          open={open}
+        >
+          <BootstrapDialogTitle
+            id="customized-dialog-title"
+            onClose={handleClose}
+          ></BootstrapDialogTitle>
+          <DialogContent dividers>
+            <SizeComponent
+              label1={
+                category && category === "shirts"
+                  ? "shirts"
+                  : category === "suits"
+                  ? "jacket"
+                  : ""
+              }
+              label2={
+                category && category === "shirts"
+                  ? ""
+                  : category === "suits"
+                  ? "trouser"
+                  : ""
+              }
+              measurementData={measurementDataa}
+            />
+          </DialogContent>
+        </BootstrapDialog>
       </Paper>
     </>
   );
 }
-{
-  /* <div style={{ display: "none" }}>
-  <Practice.Provider value={"varunnn"}>
-    <InputForm value={"varr"} />
-  </Practice.Provider>
-</div>; */
-}
 
 export default product;
-export { Practice };
+export { DataTransfer };

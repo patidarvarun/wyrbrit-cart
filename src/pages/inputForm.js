@@ -11,7 +11,7 @@ import IconButton from "@mui/material/IconButton";
 import CloseIcon from "@mui/icons-material/Close";
 import SizeComponent from "./reuseComponent/sizeComponent";
 import Loader from "../components/common/loader";
-import { Practice } from "./product/[slug]";
+import { DataTransfer } from "./product/[slug]";
 import {
   doc,
   getDoc,
@@ -21,7 +21,6 @@ import {
   getDocs,
 } from "firebase/firestore";
 import { database } from "../../firebase/ firebaseConfig";
-import { Context } from "./context";
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
   "& .MuiDialogContent-root": {
@@ -68,13 +67,13 @@ BootstrapDialogTitle.propTypes = {
   onClose: PropTypes.func.isRequired,
 };
 
-function inputForm(props) {
+function InputForm(props) {
   const [categoryData, setCategoryData] = useState("");
   const dbInstance = collection(database, "category_unit");
   const dbInstance1 = collection(database, "measurement_unit");
   const [loading, setLoading] = useState(false);
-
   let slugArray = [];
+  console.log("propInpiyuu", props);
   let measurementData = [];
   const getNotes = async () => {
     const data = await getDocs(dbInstance);
@@ -132,16 +131,13 @@ function inputForm(props) {
     // getNo();
   }, []);
 
-  const counter = useContext(Context);
-  // console.log("!!!!!!!!!!!!!", counter);
-
   return (
-    <div className="">
-      <Practice.Consumer>
+    <>
+      <DataTransfer.Consumer>
         {(fname) => {
           return console.log("fname", fname);
         }}
-      </Practice.Consumer>
+      </DataTransfer.Consumer>
       <style global jsx>{`
         .MuiPaper-root.MuiPaper-elevation.MuiPaper-rounded.MuiPaper-elevation24.MuiDialog-paper.MuiDialog-paperScrollPaper.MuiDialog-paperWidthSm.css-bclhn9-MuiPaper-root-MuiDialog-paper {
           width: 50%;
@@ -188,8 +184,8 @@ function inputForm(props) {
       {/* ) : (
         <Loader />
       )} */}
-    </div>
+    </>
   );
 }
 
-export default inputForm;
+export default InputForm;

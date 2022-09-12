@@ -8,7 +8,7 @@ import SizeChart from "./sizeChart";
 
 const SizeComponent = (props) => {
   const [value, setValue] = React.useState("1");
-  console.log("@@@@props", props);
+  // console.log("SizeComponent-props", props);
   const handleChange = (event, newValue) => {
     setValue(newValue);
   };
@@ -20,13 +20,21 @@ const SizeComponent = (props) => {
           <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
             <TabList onChange={handleChange} aria-label="lab API tabs example">
               <Tab label={props.label1} value="1" />
-              <Tab label={props.lebel2} value="2" />
+              <Tab label={props.label2} value="2" />
             </TabList>
           </Box>
           <TabPanel value="1">
-            <SizeChart name1={props.name1} name2={props.name2} />
+            <SizeChart
+              chartData={props.measurementData}
+              labelName={props.label1}
+            />
           </TabPanel>
-          <TabPanel value="2">Item Two</TabPanel>
+          <TabPanel value="2">
+            <SizeChart
+              chartData={props.measurementData}
+              labelName={props.label2}
+            />
+          </TabPanel>
         </TabContext>
       </Box>
     </>
