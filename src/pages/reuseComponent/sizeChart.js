@@ -20,34 +20,30 @@ function SizeChart(props) {
   const [addcss, setaddCss] = useState("");
   const [sizeObject, setSizeObject] = useState([]);
 
-  function handleSelect(size, name, label) {
+  const handleClick = () => {
+    console.log("sizeobject", sizeObject);
+  };
+
+  function handleSelect(itemIndex, size, name, label) {
     setaddCss(name);
+    var sizeData = {};
     setSelectedValue({ size, name, label });
-    if (sizeObject.length === 0) {
-      sizeObject.push({ size, name, label });
+    sizeData = { itemIndex, size, name, label };
+    var index = sizeObject.findIndex((std) => std.name === name);
+
+    if (index === -1) {
+      sizeObject.push(sizeData);
     } else {
-      sizeObject &&
-        sizeObject.find((data) => {
-          return data.name === name
-            ? data.name === name && ((data.size = size), true)
-            : sizeObject.push({ size, name, label });
-        });
+      sizeObject.splice(index, 1, sizeData);
     }
   }
-  // console.log("sizeObject", sizeObject);
-  // console.log("selectedValue", selectedValue);
+
   return (
     <Box sx={{ width: "100%", typography: "body1" }}>
       {props?.chartData?.map((data) => {
         if (data.filter === props.labelName) {
           return (
             <>
-              <style global jsx>{`
-                .tickcss {
-                  color: white;
-                  background: #4545d7;
-                }
-              `}</style>
               <TabPanel value="1">{data.name} &emsp;&emsp;&emsp;</TabPanel>
               <TabPanel value="2">{data.name}&emsp;&emsp;&emsp;</TabPanel>
 
@@ -56,23 +52,42 @@ function SizeChart(props) {
                 rowSpacing={1}
                 columnSpacing={{ xs: 1, sm: 2, md: 3 }}
               >
-                {data.values.map((val) => (
-                  <Grid item xs={3} style={{ width: "25% !important" }}>
-                    <Item
-                      className={
-                        selectedValue.name === data.name &&
-                        selectedValue.size === val
-                          ? "tickcss"
-                          : ""
-                      }
-                      onClick={() =>
-                        handleSelect(val, data.name, props.labelName)
-                      }
+                {data.values.map((val, itemIndex) => {
+                  var index = sizeObject.findIndex(
+                    (std) =>
+                      std.itemIndex === itemIndex && std.name === data.name
+                  );
+
+                  return (
+                    <Grid
+                      item
+                      xs={3}
+                      style={{
+                        width: "25% !important",
+                      }}
                     >
-                      {val}
-                    </Item>
-                  </Grid>
-                ))}
+                      <Item
+                        style={{
+                          background: index === -1 ? "white" : "#3832A0",
+                          color: index === -1 ? "#6c6c6c" : "white",
+                          border: "1px solid rgb(108, 108, 108)",
+                          borderRadius: "5px",
+                          cursor: "pointer",
+                        }}
+                        onClick={() =>
+                          handleSelect(
+                            itemIndex,
+                            val,
+                            data.name,
+                            props.labelName
+                          )
+                        }
+                      >
+                        {val}
+                      </Item>
+                    </Grid>
+                  );
+                })}
               </Grid>
             </>
           );
@@ -80,8 +95,13 @@ function SizeChart(props) {
       })}
       <div style={{ padding: "50px" }}>
         <DialogActions>
-          <Button size="large" style={{ margin: "0 auto" }} variant="contained">
-            APPLY TO SHIRT
+          <Button
+            onClick={handleClick}
+            size="large"
+            style={{ margin: "0 auto" }}
+            variant="contained"
+          >
+            APPLY TO {props?.labelName?.toUpperCase()}
           </Button>
         </DialogActions>
       </div>
