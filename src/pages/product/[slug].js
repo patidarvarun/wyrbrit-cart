@@ -106,17 +106,17 @@ function product() {
       slugArray.push(docRef);
       catArray.push(cat.slug);
     });
-    const feedPosts = await fetchFeedPosts(measurementValue);
-    for (var i = 0; i < feedPosts.length; i++) {
+    const sizeData = await getSizeChartData(measurementValue);
+    for (var i = 0; i < sizeData.length; i++) {
       measurementData.push({
         filter: catArray[i],
-        name: feedPosts[i].name,
-        values: feedPosts[i].values,
+        name: sizeData[i].name,
+        values: sizeData[i].values,
       });
     }
     setMeasurementDataa(measurementData);
   };
-  async function fetchFeedPosts(postIds = []) {
+  async function getSizeChartData(postIds = []) {
     const promises = postIds.map(async (postId) => {
       const docSnapshot = await db
         .collection("measurement_unit")
@@ -125,8 +125,8 @@ function product() {
       const docData = docSnapshot.data();
       return docData;
     });
-    const feedPosts = await Promise.all(promises);
-    return feedPosts;
+    const sizeData = await Promise.all(promises);
+    return sizeData;
   }
 
   function handleDataSet(data) {
