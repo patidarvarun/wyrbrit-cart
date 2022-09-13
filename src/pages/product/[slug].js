@@ -1,4 +1,4 @@
-import React, { useEffect, useState, createContext } from "react";
+import React, { useEffect, useState } from "react";
 import productDetail from "../../data/wooCommerce/productDetails";
 import { styled } from "@mui/material/styles";
 import Paper from "@mui/material/Paper";
@@ -11,23 +11,14 @@ import { Button } from "@mui/material";
 import Dialog from "@mui/material/Dialog";
 import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
-import DialogActions from "@mui/material/DialogActions";
 import IconButton from "@mui/material/IconButton";
 import CloseIcon from "@mui/icons-material/Close";
 import PropTypes from "prop-types";
-import {
-  doc,
-  getDoc,
-  collection,
-  query,
-  where,
-  getDocs,
-} from "firebase/firestore";
-import { database } from "../../../firebase/ firebaseConfig";
+import { doc, collection, getDocs } from "firebase/firestore";
+import { db, database } from "../../../firebase/ firebaseConfig";
 import SizeComponent from "../reuseComponent/sizeComponent";
 import Loader from "../../components/common/loader";
 
-const DataTransfer = createContext();
 const Img = styled("img")({
   margin: "auto",
   display: "block",
@@ -83,9 +74,9 @@ function product() {
   const { slug } = router.query;
   let slugArray = [];
   let catArray = [];
-  const [activeTab, setActiveTab] = useState();
+  let categoryArray = [];
+  let measurementValue = [];
   const [tabArray, setTabArray] = useState([]);
-
   let measurementData = [];
   const [product, setProduct] = useState("");
   const [category, setCategory] = useState("");
@@ -101,6 +92,7 @@ function product() {
     const products = productDetail(slug);
     products.then((data) => setProduct(data.data));
   }
+
   const getMeasurementData = async () => {
     const data = await getDocs(dbInstance);
     const getData = data.docs.map((doc) => doc.data());
@@ -108,40 +100,38 @@ function product() {
       if (!tabArray.includes(cat.slug) && cat.slug) {
         tabArray.push(cat.slug);
       }
+      measurementValue.push(cat.reference.id);
+      categoryArray.push(cat.slug);
       const docRef = doc(database, "measurement_unit", cat.reference.id);
       slugArray.push(docRef);
       catArray.push(cat.slug);
     });
-    for (var i = 0; i < slugArray.length; i++) {
-      const docSnapp = await getDoc(slugArray[i]);
-      var slugMeasure = docSnapp.data();
-      setActiveTab(catArray[0]);
-
-      if (docSnapp.exists()) {
-        measurementData.push({
-          filter: catArray[i],
-          name: slugMeasure.name,
-          values: slugMeasure.values,
-        });
-      } else {
-        console.log("No such document!");
-      }
+    const feedPosts = await fetchFeedPosts(measurementValue);
+    for (var i = 0; i < feedPosts.length; i++) {
+      measurementData.push({
+        filter: catArray[i],
+        name: feedPosts[i].name,
+        values: feedPosts[i].values,
+      });
     }
     setMeasurementDataa(measurementData);
   };
+  async function fetchFeedPosts(postIds = []) {
+    const promises = postIds.map(async (postId) => {
+      const docSnapshot = await db
+        .collection("measurement_unit")
+        .doc(postId)
+        .get();
+      const docData = docSnapshot.data();
+      return docData;
+    });
+    const feedPosts = await Promise.all(promises);
+    return feedPosts;
+  }
 
   function handleDataSet(data) {
     setCategory(data.slug);
-    if (measurementDataa.length !== 0) {
-      setOpen(true);
-      setLoading(false);
-    } else {
-      setLoading(true);
-      setTimeout(() => {
-        setLoading(false);
-        setOpen(true);
-      }, 17000);
-    }
+    setOpen(true);
   }
 
   useEffect(() => {
@@ -264,23 +254,25 @@ function product() {
             onClose={handleClose}
           ></BootstrapDialogTitle>
           <DialogContent dividers>
-            <SizeComponent
-              label1={
-                category && category === "shirts"
-                  ? "shirts"
-                  : category === "suits"
-                  ? "jacket"
-                  : ""
-              }
-              label2={
-                category && category === "shirts"
-                  ? ""
-                  : category === "suits"
-                  ? "trouser"
-                  : ""
-              }
-              measurementData={measurementDataa}
-            />
+            {measurementDataa && (
+              <SizeComponent
+                label1={
+                  category && category === "shirts"
+                    ? "shirts"
+                    : category === "suits"
+                    ? "jacket"
+                    : ""
+                }
+                label2={
+                  category && category === "shirts"
+                    ? ""
+                    : category === "suits"
+                    ? "trouser"
+                    : ""
+                }
+                measurementData={measurementDataa}
+              />
+            )}
           </DialogContent>
         </BootstrapDialog>
       </Paper>
@@ -289,4 +281,3 @@ function product() {
 }
 
 export default product;
-export { DataTransfer };
