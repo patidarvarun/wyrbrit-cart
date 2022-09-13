@@ -131,7 +131,16 @@ function product() {
 
   function handleDataSet(data) {
     setCategory(data.slug);
-    setOpen(true);
+    if (measurementDataa.length !== 0) {
+      setOpen(true);
+      setLoading(false);
+    } else {
+      setLoading(true);
+      setTimeout(() => {
+        setLoading(false);
+        setOpen(true);
+      }, 3000);
+    }
   }
 
   useEffect(() => {
