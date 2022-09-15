@@ -30,7 +30,6 @@ function SizeChart(props) {
     setSelectedValue({ size, name, label });
     sizeData = { itemIndex, size, name, label };
     var index = sizeObject.findIndex((std) => std.name === name);
-
     if (index === -1) {
       sizeObject.push(sizeData);
     } else {

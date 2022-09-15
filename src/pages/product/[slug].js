@@ -74,7 +74,6 @@ function product() {
   const { slug } = router.query;
   let slugArray = [];
   let catArray = [];
-  let categoryArray = [];
   let measurementValue = [];
   const [tabArray, setTabArray] = useState([]);
   let measurementData = [];
@@ -101,7 +100,6 @@ function product() {
         tabArray.push(cat.slug);
       }
       measurementValue.push(cat.reference.id);
-      categoryArray.push(cat.slug);
       const docRef = doc(database, "measurement_unit", cat.reference.id);
       slugArray.push(docRef);
       catArray.push(cat.slug);
