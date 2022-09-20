@@ -114,7 +114,6 @@ function product() {
     }
     setMeasurementDataa(measurementData);
   };
-  console.log("measurementDataa", measurementDataa);
   async function getSizeChartData(postIds = []) {
     const promises = postIds.map(async (postId) => {
       const docSnapshot = await db
@@ -252,7 +251,6 @@ function product() {
             height: 32em;
           }
         `}</style>
-        {console.log("categorycategory", category)}
         <BootstrapDialog
           onClose={handleClose}
           aria-labelledby="customized-dialog-title"
