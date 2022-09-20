@@ -26,7 +26,7 @@ import { createTheme } from "../theme";
 import { createEmotionCache } from "../utils/create-emotion-cache";
 import { SnackbarProvider } from "notistack";
 import "../i18n";
-
+import "./table.css";
 const client = new ApolloClient({
   uri: process.env.WORDPRESS_GRAPHQL_ENDPOINT,
 });

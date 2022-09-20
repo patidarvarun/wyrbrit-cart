@@ -72,7 +72,7 @@ const Shop = (props) => {
                   <Grid item key={item.slug} md={4} xs={12}>
                     <Card>
                       <Box sx={{ p: 2 }}>
-                        <Link href={"/product/" + item.slug}>
+                        <Link href={"/singleProduct/" + item.slug}>
                           <a>
                             <CardMedia
                               image={
@@ -96,7 +96,7 @@ const Shop = (props) => {
                         >
                           <Box sx={{ ml: 2 }}>
                             <Link
-                              href={"/product/" + item.slug}
+                              href={"/singleProduct/" + item.slug}
                               color="textPrimary"
                               variant="h6"
                             >
