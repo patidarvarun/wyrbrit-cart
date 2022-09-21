@@ -18,6 +18,8 @@ import {
   SettingsConsumer,
   SettingsProvider,
 } from "../contexts/settings-context";
+import { Elements } from "@stripe/react-stripe-js";
+import { loadStripe } from "@stripe/stripe-js";
 import { AuthConsumer, AuthProvider } from "../contexts/jwt-context";
 import { gtmConfig } from "../config";
 import { gtm } from "../lib/gtm";
@@ -27,9 +29,13 @@ import { createEmotionCache } from "../utils/create-emotion-cache";
 import { SnackbarProvider } from "notistack";
 import "../i18n";
 import "./table.css";
+
 const client = new ApolloClient({
   uri: process.env.WORDPRESS_GRAPHQL_ENDPOINT,
 });
+const stripePromise = loadStripe(
+  "pk_test_51LabasSBAnAyyheh1eHmZUT6yHELndmIh1LvJy4eDuMZQo3kATeWkh0dHCI90hUvxQdFhlaCBhrNyQ1VQDVoJCno001vmRtGRk"
+);
 
 Router.events.on("routeChangeStart", nProgress.start);
 Router.events.on("routeChangeError", nProgress.done);
@@ -55,38 +61,40 @@ const App = (props) => {
         </Head>
         <ReduxProvider store={store}>
           <LocalizationProvider dateAdapter={AdapterDateFns}>
-            <AuthProvider>
-              <SettingsProvider>
-                <SettingsConsumer>
-                  {({ settings }) => (
-                    <ThemeProvider
-                      theme={createTheme({
-                        direction: settings.direction,
-                        responsiveFontSizes: settings.responsiveFontSizes,
-                        mode: settings.theme,
-                      })}
-                    >
-                      <RTL direction={settings.direction}>
-                        <CssBaseline />
-                        <SnackbarProvider maxSnack={3}>
-                          <Toaster position="top-center" />
-                          <SettingsButton />
-                          <AuthConsumer>
-                            {(auth) =>
-                              !auth.isInitialized ? (
-                                <SplashScreen />
-                              ) : (
-                                getLayout(<Component {...pageProps} />)
-                              )
-                            }
-                          </AuthConsumer>
-                        </SnackbarProvider>
-                      </RTL>
-                    </ThemeProvider>
-                  )}
-                </SettingsConsumer>
-              </SettingsProvider>
-            </AuthProvider>
+            <Elements stripe={stripePromise}>
+              <AuthProvider>
+                <SettingsProvider>
+                  <SettingsConsumer>
+                    {({ settings }) => (
+                      <ThemeProvider
+                        theme={createTheme({
+                          direction: settings.direction,
+                          responsiveFontSizes: settings.responsiveFontSizes,
+                          mode: settings.theme,
+                        })}
+                      >
+                        <RTL direction={settings.direction}>
+                          <CssBaseline />
+                          <SnackbarProvider maxSnack={3}>
+                            <Toaster position="top-center" />
+                            <SettingsButton />
+                            <AuthConsumer>
+                              {(auth) =>
+                                !auth.isInitialized ? (
+                                  <SplashScreen />
+                                ) : (
+                                  getLayout(<Component {...pageProps} />)
+                                )
+                              }
+                            </AuthConsumer>
+                          </SnackbarProvider>
+                        </RTL>
+                      </ThemeProvider>
+                    )}
+                  </SettingsConsumer>
+                </SettingsProvider>
+              </AuthProvider>
+            </Elements>
           </LocalizationProvider>
         </ReduxProvider>
       </ApolloProvider>

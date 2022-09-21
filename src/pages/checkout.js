@@ -1,186 +1,474 @@
-import { useEffect, useState } from 'react';
-import NextLink from 'next/link';
-import Head from 'next/head';
-import { Box, Button, Container, Grid, Typography } from '@mui/material';
-import { CheckoutBilling } from '../components/checkout/checkout-billing';
-import { CheckoutOrderSummary } from '../components/checkout/checkout-order-summary';
-import { ArrowLeft as ArrowLeftIcon } from '../icons/arrow-left';
-import { ArrowRight as ArrowRightIcon } from '../icons/arrow-right';
-import { Lock as LockIcon } from '../icons/lock';
-import { gtm } from '../lib/gtm';
+import React, { useState, useMemo, useEffect } from "react";
+import {
+  Box,
+  Button,
+  Grid,
+  TextField,
+  Typography,
+  FormControl,
+  InputLabel,
+} from "@mui/material";
+import { CommonHeader } from "../components/commonHeader";
+import Accordion from "@mui/material/Accordion";
+import country from "../data/wooCommerce/countries";
+import MenuItem from "@mui/material/MenuItem";
+import { useStripe, useElements, CardElement } from "@stripe/react-stripe-js";
+import AccordionSummary from "@mui/material/AccordionSummary";
+import AccordionDetails from "@mui/material/AccordionDetails";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import Select from "@mui/material/Select";
 
-const productsData = [
-  {
-    id: '97375399bf10f57d0f0f7fd9',
-    image: '/static/mock-images/products/product_1.png',
-    name: 'Healthcare Erbology',
-    price: 23.99,
-    quantity: 1
-  },
-  {
-    id: 'ece4069546ff025047b97735',
-    image: '/static/mock-images/products/product_2.png',
-    name: 'Makeup Lancome Rouge',
-    price: 95.00,
-    quantity: 1
-  }
-];
-
-const Checkout = () => {
-  const [billing, setBilling] = useState({
-    address: '',
-    cardExpirationDate: '',
-    cardNumber: '',
-    cardOwner: '',
-    cardSecurityCode: '',
-    firstName: '',
-    lastName: '',
-    optionalAddress: '',
-    paymentMethod: 'visa',
-    state: '',
-    zip: ''
-  });
-  const [products, setProducts] = useState(productsData);
-
-  useEffect(() => {
-    gtm.push({ event: 'page_view' });
-  }, []);
-
-  const handleBillingChange = (event) => {
-    setBilling((prevBilling) => ({
-      ...prevBilling,
-      [event.target.name]: event.target.value
-    }));
-  };
-
-  const handleProductQuantityChange = (event, productId) => {
-    setProducts((prevProducts) => prevProducts.map((product) => {
-      if (product.id === productId) {
-        return {
-          ...product,
-          quantity: event.target.value
-        };
-      }
-
-      return product;
-    }));
-  };
-
-  const handleSubmit = (event) => {
-    event.preventDefault();
-  };
-
-  const subtotal = products
-    .reduce((accumulator, product) => accumulator + product.price * product.quantity, 0);
-  const shippingTax = 12;
-  const total = subtotal + shippingTax;
-
-  return (
-    <>
-      <Head>
-        <title>
-          Checkout | Material Kit Pro
-        </title>
-      </Head>
-      <Box
-        component="main"
-        sx={{
-          backgroundColor: 'background.paper',
-          flexGrow: 1,
-          py: 8
-        }}
-      >
-        <Container maxWidth="lg">
-          <form onSubmit={handleSubmit}>
-            <NextLink
-              href="/dashboard"
-              passHref
-            >
-              <Button
-                component="a"
-                startIcon={<ArrowLeftIcon fontSize="small" />}
-              >
-                Dashboard
-              </Button>
-            </NextLink>
-            <Typography
-              variant="h3"
-              sx={{ mt: 3 }}
-            >
-              Checkout
-            </Typography>
-            <Box mt={6}>
-              <Grid
-                container
-                spacing={6}
-              >
-                <Grid
-                  item
-                  md={7}
-                  xs={12}
-                >
-                  <CheckoutBilling
-                    billing={billing}
-                    onChange={handleBillingChange}
-                  />
-                </Grid>
-                <Grid
-                  item
-                  md={5}
-                  xs={12}
-                >
-                  <CheckoutOrderSummary
-                    onQuantityChange={handleProductQuantityChange}
-                    products={products}
-                    shippingTax={shippingTax}
-                    subtotal={subtotal}
-                    total={total}
-                  />
-                </Grid>
-              </Grid>
-            </Box>
-            <Box sx={{ mt: 6 }}>
-              <Box
-                sx={{
-                  alignItems: 'center',
-                  display: 'flex'
-                }}
-              >
-                <LockIcon
-                  fontWeight="small"
-                  sx={{ color: 'text.secondary' }}
-                />
-                <Typography
-                  sx={{ ml: 2 }}
-                  variant="subtitle2"
-                >
-                  Secure Checkout
-                </Typography>
-              </Box>
-              <Typography
-                color="textSecondary"
-                sx={{ mt: 2 }}
-                variant="body2"
-              >
-                Your purchases are secured by an industry best encryption
-                service – Braintree
-              </Typography>
-              <Button
-                color="primary"
-                endIcon={<ArrowRightIcon fontSize="small" />}
-                size="large"
-                sx={{ mt: 3 }}
-                type="submit"
-                variant="contained"
-              >
-                Complete order
-              </Button>
-            </Box>
-          </form>
-        </Container>
-      </Box>
-    </>
+const useOptions = () => {
+  const options = useMemo(
+    () => ({
+      style: {
+        base: {
+          color: "#424770",
+          letterSpacing: "0.025em",
+          fontFamily: "Source Code Pro, monospace",
+          "::placeholder": {
+            color: "#aab7c4",
+          },
+        },
+        invalid: {
+          color: "#9e2146",
+        },
+      },
+    }),
+    []
   );
+
+  return options;
 };
 
+const Checkout = (props) => {
+  const stripe = useStripe();
+  const elements = useElements();
+  const options = useOptions();
+  const { billing, onChange, ...other } = props;
+  let getData = localStorage.getItem("data");
+  let product = JSON.parse(getData);
+  const [clientSecret, setClientSecret] = useState("");
+
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [email, setEmail] = useState("");
+  const [city, setCity] = useState("");
+  const [address1, setAddress1] = useState("");
+  const [address2, setAddress2] = useState("");
+  const [zipCode, setZipCode] = useState("");
+  const [phone, setPhone] = useState("");
+  const [Country, setCountry] = useState("");
+  const [countryy, setCountryy] = useState("");
+  const [state, setState] = useState("");
+  const [stateData, setStateData] = useState("");
+  const [stateDatas, setStateDatas] = useState("");
+
+  let total = 0;
+  let pric = 0;
+  console.log("product", product);
+  for (let i = 0; i < product.length; i++) {
+    pric = product[i].quantity * product[i].product.price;
+    total = total + pric;
+  }
+  function handleClick() {
+    fetch("/api/checkout-api/", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        amount: total,
+        FirstName: firstName,
+        LastName: lastName,
+        city: city,
+        country: countryy,
+        line1: address1,
+        line2: address2,
+        postal_code: zipCode,
+        state: stateDatas === "" ? state : stateDatas,
+      }),
+    })
+      .then((res) => res.json())
+      .then((json) => {
+        // window.open(json.url, "_self");
+        setClientSecret(json.client_secret);
+      });
+  }
+
+  function countr() {
+    const countries = country();
+    countries.then((data) => setCountry(data.data));
+  }
+
+  function handleState(e) {
+    setStateDatas(e.target.value);
+  }
+  useEffect(() => {
+    countr();
+    handleClick();
+  }, []);
+
+  const handleCountry = (e) => {
+    setCountryy(e.target.value);
+    Country.filter((item) =>
+      item.name === e.target.value ? setStateData(item.states) : ""
+    );
+  };
+
+  const handleSubmit = async (event) => {
+    handleClick();
+    setTimeout(async () => {
+      if (!stripe || !elements) {
+        return;
+      }
+
+      const result = await stripe.confirmCardPayment(`${clientSecret}`, {
+        payment_method: {
+          card: elements.getElement(CardElement),
+          billing_details: {
+            address: {
+              city: "city",
+              country: "US",
+              line1: "510 Townsend St",
+              line2: "510 Townsend St",
+              postal_code: "98140",
+              state: "WA",
+            },
+            email: "var@gmail.com",
+            name: "Jenny Rosen",
+          },
+        },
+      });
+
+      if (result.error) {
+        console.log("errrrrrrrrrrrrr", result.error.message);
+      } else {
+        if (result.paymentIntent.status === "succeeded") {
+          console.log("##############result", result);
+        }
+      }
+    }, 4000);
+  };
+  console.log("clientSecret", clientSecret);
+  return (
+    <div {...other} style={{ marginLeft: "10px" }}>
+      <CommonHeader />
+      <br />
+      <br />
+      <br />
+      <br />
+      <Typography variant="h3" sx={{ mt: 3 }}>
+        Checkout
+      </Typography>
+      <br />
+      <br />
+      <br />
+      <Box
+        sx={{
+          alignItems: "center",
+          display: "flex",
+        }}
+      >
+        <Typography sx={{ ml: 2 }} variant="h6">
+          Billing Address
+        </Typography>
+      </Box>
+      <Box sx={{ mt: 3 }}>
+        <Grid container spacing={3}>
+          <Grid item sm={3} xs={12}>
+            <TextField
+              fullWidth
+              label="First Name *"
+              name="firstName"
+              onChange={(e) => setFirstName(e.target.value)}
+            />
+          </Grid>
+          <Grid item sm={3} xs={12}>
+            <TextField
+              fullWidth
+              label="Last Name *"
+              name="lastName"
+              onChange={(e) => setLastName(e.target.value)}
+            />
+          </Grid>
+        </Grid>
+        <Grid container spacing={3} sx={{ marginTop: "3px" }}>
+          <Grid item sm={6} xs={12}>
+            <InputLabel id="demo-select-small">Country *</InputLabel>
+            <FormControl fullWidth className="filter ml-0 w-100 country">
+              <Select
+                labelId="demo-simple-select-helper-label"
+                id="demo-simple-select-helper"
+                value={countryy}
+                label="country *"
+                onChange={handleCountry}
+              >
+                {Country &&
+                  Country.map((item) => {
+                    return (
+                      <MenuItem key={item.name} value={item.name}>
+                        {item.name}
+                      </MenuItem>
+                    );
+                  })}
+              </Select>
+            </FormControl>
+          </Grid>
+        </Grid>
+        <Grid container spacing={3} sx={{ marginTop: "3px" }}>
+          <Grid item sm={6} xs={12}>
+            <TextField
+              fullWidth
+              label="Street Address *"
+              name="address1"
+              onChange={(e) => setAddress1(e.target.value)}
+            />
+          </Grid>
+        </Grid>
+        <Grid container spacing={3} sx={{ marginTop: "3px" }}>
+          <Grid item sm={6} xs={12}>
+            <TextField
+              fullWidth
+              label="Street Line 2 (optional)"
+              name="address1"
+              onChange={(e) => setAddress2(e.target.value)}
+            />
+          </Grid>
+        </Grid>
+        <Grid container spacing={3} sx={{ marginTop: "3px" }}>
+          <Grid item sm={6} xs={12}>
+            <TextField
+              fullWidth
+              label="Town / City *"
+              name="city"
+              onChange={(e) => setCity(e.target.value)}
+            />
+          </Grid>
+        </Grid>
+        <Grid container spacing={3} sx={{ marginTop: "3px" }}>
+          <Grid item sm={6} xs={12}>
+            <InputLabel id="demo-select-small">State</InputLabel>
+            {stateData && stateData.length === 0 ? (
+              <TextField
+                fullWidth
+                label=""
+                margin="normal"
+                name="state"
+                onChange={(e) => setState(e.target.value)}
+              />
+            ) : (
+              <FormControl fullWidth className="filter ml-0 w-100 country">
+                <Select
+                  labelId="demo-simple-select-helper-label"
+                  id="demo-simple-select-helper"
+                  value={stateDatas}
+                  label="country"
+                  onChange={handleState}
+                >
+                  {stateData &&
+                    stateData.map((item) => {
+                      return (
+                        <MenuItem key={item.name} value={item.name}>
+                          {item.name}
+                        </MenuItem>
+                      );
+                    })}
+                </Select>
+              </FormControl>
+            )}
+          </Grid>
+        </Grid>
+        <Grid container spacing={3} sx={{ marginTop: "3px" }}>
+          <Grid item sm={6} xs={12}>
+            <TextField
+              fullWidth
+              label="ZIP Code *"
+              name="zipCode"
+              onChange={(e) => setZipCode(e.target.value)}
+            />
+          </Grid>
+        </Grid>
+        <Grid container spacing={3} sx={{ marginTop: "3px" }}>
+          <Grid item sm={6} xs={12}>
+            <TextField
+              fullWidth
+              label="Phone *"
+              name="phone"
+              onChange={(e) => setPhone(e.target.value)}
+            />
+          </Grid>
+        </Grid>
+        <Grid container spacing={3} sx={{ marginTop: "3px" }}>
+          <Grid item sm={6} xs={12}>
+            <TextField
+              fullWidth
+              label="Email address *"
+              name="email"
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          </Grid>
+        </Grid>
+      </Box>
+      <Box
+        sx={{
+          alignItems: "center",
+          display: "flex",
+          mt: 6,
+        }}
+      >
+        <Typography sx={{ ml: 2 }} variant="h6">
+          Your order
+        </Typography>
+      </Box>
+      <Grid container spacing={3} sx={{ marginTop: "3px" }}>
+        <Grid item sm={6} xs={12}>
+          <Box
+            sx={{
+              color: "text.primary",
+              mt: 3,
+            }}
+          >
+            <table
+              style={{ width: "100%" }}
+              class="shop_table woocommerce-checkout-review-order-table"
+            >
+              <thead>
+                <tr>
+                  <th class="product-name">Product</th>
+                  <th class="product-total">Subtotal</th>
+                </tr>
+              </thead>
+              <tbody>
+                {product &&
+                  product.map((item) => {
+                    return (
+                      <tr class="cart_item">
+                        <td class="product-name">
+                          {item.product.name} ×&nbsp;{" "}
+                          <strong class="product-quantity">
+                            {" "}
+                            &nbsp;{item.quantity}
+                          </strong>{" "}
+                        </td>
+                        <td class="product-total">
+                          <span class="woocommerce-Price-amount amount">
+                            <bdi>
+                              <span class="woocommerce-Price-currencySymbol">
+                                $
+                              </span>
+                              {item.quantity * item.product.price}
+                            </bdi>
+                          </span>{" "}
+                        </td>
+                      </tr>
+                    );
+                  })}
+              </tbody>
+              <tfoot>
+                <tr class="cart-subtotal">
+                  <th>Subtotal</th>
+                  <td>
+                    <span class="woocommerce-Price-amount amount">
+                      <bdi>
+                        <span class="woocommerce-Price-currencySymbol">$</span>
+                        {total}
+                      </bdi>
+                    </span>
+                  </td>
+                </tr>
+
+                <tr class="order-total">
+                  <th>Total</th>
+                  <td>
+                    <strong>
+                      <span class="woocommerce-Price-amount amount">
+                        <bdi>
+                          <span class="woocommerce-Price-currencySymbol">
+                            $
+                          </span>
+                          {total}
+                        </bdi>
+                      </span>
+                    </strong>{" "}
+                  </td>
+                </tr>
+              </tfoot>
+            </table>
+          </Box>
+        </Grid>
+      </Grid>
+      <Grid container spacing={3} sx={{ marginTop: "3px" }}>
+        <Grid item sm={6} xs={12}>
+          <Box
+            sx={{
+              color: "text.primary",
+              mt: 3,
+            }}
+          >
+            <Accordion>
+              <AccordionSummary
+                expandIcon={<ExpandMoreIcon />}
+                aria-controls="panel1a-content"
+                id="panel1a-header"
+              >
+                <Typography style={{ fontWeight: "500" }}>
+                  {" "}
+                  Cash on delivery
+                </Typography>
+              </AccordionSummary>
+              <AccordionDetails>
+                <Typography>Pay with cash upon delivery.</Typography>
+              </AccordionDetails>
+            </Accordion>
+            <Accordion>
+              <AccordionSummary
+                expandIcon={<ExpandMoreIcon />}
+                aria-controls="panel2a-content"
+                id="panel2a-header"
+              >
+                <Typography style={{ fontWeight: "700", fontSize: "20px" }}>
+                  {" "}
+                  Credit Card (Stripe)
+                </Typography>
+              </AccordionSummary>
+              <AccordionDetails>
+                <form onSubmit={handleSubmit}>
+                  <label>
+                    Card details
+                    <CardElement
+                      options={options}
+                      onReady={() => {
+                        console.log("CardElement [ready]");
+                      }}
+                      onChange={(event) => {
+                        console.log("CardElement [change]", event);
+                      }}
+                      onBlur={() => {
+                        console.log("CardElement [blur]");
+                      }}
+                      onFocus={() => {
+                        console.log("CardElement [focus]");
+                      }}
+                    />
+                  </label>
+
+                  <Button
+                    type="submit"
+                    size="large"
+                    sx={{ mr: 3 }}
+                    disabled={!stripe}
+                    className="orderr"
+                  >
+                    Place order
+                  </Button>
+                </form>
+              </AccordionDetails>
+            </Accordion>
+          </Box>
+        </Grid>
+      </Grid>
+    </div>
+  );
+};
 export default Checkout;
