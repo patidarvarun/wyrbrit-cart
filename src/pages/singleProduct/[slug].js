@@ -90,15 +90,14 @@ function singleProduct() {
   let products = [];
 
   function getProductInfo(pro) {
-    console.log("pro.@@@@@@@@@@@@@@", pro);
     const getLocalData = localStorage.getItem("data");
-    console.log("getLocalData", getLocalData);
+
     if (!getLocalData) {
       products.push({ product: pro[0], quantity: quantity });
       localStorage.setItem("data", JSON.stringify(products));
     } else {
       const alreadyProduct = JSON.parse(getLocalData);
-      console.log("alreadyProduct", alreadyProduct);
+
       if (
         !alreadyProduct.includes({ product: pro[0], quantity: quantity }) &&
         alreadyProduct.length > 0
@@ -113,9 +112,6 @@ function singleProduct() {
   }
   const addToCart = () => {
     getProductInfo(product);
-    console.log("add to cart");
-    console.log("productproduct", product[0]);
-    console.log("quantityquantity", quantity);
     setshowCart(true);
   };
   useEffect(() => {

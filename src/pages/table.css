@@ -9,7 +9,7 @@ td {
 }
 
 tr:nth-child(even) {
-    background-color: #eee;
+    background-color:none;
 }
 
 th[scope="col"] {
@@ -73,4 +73,25 @@ table {
     width: 13em !important;
     height: 3em !important;
     margin-top: 21px !important;
+  }
+  Button.cart:hover{
+     background-color:#e89f71 !important;
+  }
+  Button.orderr:hover{
+    background-color:#e89f71 !important;
+  }
+  Button.successhover:hover{
+    background-color:#e89f71 !important;
+  }
+  .bordercss{
+        margin-left: 10px;
+        border-right-style: dashed;
+        border-width: thin;
+        border-right-color: #bbb6b6;
+  }
+  .bordercsss{
+    margin-left: 10px;
+  }
+  .fontSizee{
+    font-size: 15px;
   }

@@ -4,22 +4,22 @@ const stripe = require("stripe")(
 
 module.exports = async (req, res) => {
   let session;
-  console.log("@@@@@@@@@@@@@@", req.body);
   try {
     session = await stripe.paymentIntents
       .create({
         currency: "usd",
-        amount: req.body.amount,
-        description: "Software development services",
+        amount: req.body.amount * 100,
+        description: "Product",
         shipping: {
-          name: req.body.FirstName,
+          name: `${req.body.FirstName + " " + req.body.LastName}`,
+          phone: req.body.phone,
           address: {
             city: req.body.city,
             country: req.body.country,
             line1: req.body.line1,
             line2: req.body.line2,
             postal_code: req.body.postal_code,
-            state: res.body.state,
+            state: req.body.state,
           },
         },
         payment_method_types: ["card"],

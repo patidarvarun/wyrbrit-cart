@@ -49,7 +49,6 @@ const Checkout = (props) => {
   let getData = localStorage.getItem("data");
   let product = JSON.parse(getData);
   const [clientSecret, setClientSecret] = useState("");
-
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
@@ -66,34 +65,36 @@ const Checkout = (props) => {
 
   let total = 0;
   let pric = 0;
-  console.log("product", product);
   for (let i = 0; i < product.length; i++) {
     pric = product[i].quantity * product[i].product.price;
     total = total + pric;
   }
+
   function handleClick() {
-    fetch("/api/checkout-api/", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        amount: total,
-        FirstName: firstName,
-        LastName: lastName,
-        city: city,
-        country: countryy,
-        line1: address1,
-        line2: address2,
-        postal_code: zipCode,
-        state: stateDatas === "" ? state : stateDatas,
-      }),
-    })
-      .then((res) => res.json())
-      .then((json) => {
-        // window.open(json.url, "_self");
-        setClientSecret(json.client_secret);
-      });
+    email === ""
+      ? console.log("Required all field*")
+      : fetch("/api/checkout-api/", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            amount: total,
+            FirstName: firstName,
+            LastName: lastName,
+            phone: phone,
+            city: city,
+            country: countryy,
+            line1: address1,
+            line2: address2,
+            postal_code: zipCode,
+            state: stateDatas === "" ? state : stateDatas,
+          }),
+        })
+          .then((res) => res.json())
+          .then((json) => {
+            setClientSecret(json.client_secret);
+          });
   }
 
   function countr() {
@@ -106,51 +107,49 @@ const Checkout = (props) => {
   }
   useEffect(() => {
     countr();
-    handleClick();
   }, []);
 
   const handleCountry = (e) => {
     setCountryy(e.target.value);
     Country.filter((item) =>
-      item.name === e.target.value ? setStateData(item.states) : ""
+      item.code === e.target.value ? setStateData(item.states) : ""
     );
   };
 
   const handleSubmit = async (event) => {
-    handleClick();
-    setTimeout(async () => {
-      if (!stripe || !elements) {
-        return;
-      }
-
-      const result = await stripe.confirmCardPayment(`${clientSecret}`, {
-        payment_method: {
-          card: elements.getElement(CardElement),
-          billing_details: {
-            address: {
-              city: "city",
-              country: "US",
-              line1: "510 Townsend St",
-              line2: "510 Townsend St",
-              postal_code: "98140",
-              state: "WA",
-            },
-            email: "var@gmail.com",
-            name: "Jenny Rosen",
+    event.preventDefault();
+    if (!stripe || !elements) {
+      return;
+    }
+    const result = await stripe.confirmCardPayment(`${clientSecret}`, {
+      payment_method: {
+        card: elements.getElement(CardElement),
+        billing_details: {
+          address: {
+            city: city,
+            country: countryy,
+            line1: address1,
+            line2: address2,
+            postal_code: zipCode,
+            state: stateDatas === "" ? state : stateDatas,
           },
+          email: email,
+          name: `${firstName + " " + lastName}`,
         },
-      });
+      },
+    });
 
-      if (result.error) {
-        console.log("errrrrrrrrrrrrr", result.error.message);
-      } else {
-        if (result.paymentIntent.status === "succeeded") {
-          console.log("##############result", result);
-        }
+    if (result.error) {
+      console.log("error", result.error.message);
+    } else {
+      if (result.paymentIntent.status === "succeeded") {
+        console.log("@@@@@@@@result", result);
+        window.location.replace(
+          `http://localhost:3000/success?key=${result.paymentIntent.id}`
+        );
       }
-    }, 4000);
+    }
   };
-  console.log("clientSecret", clientSecret);
   return (
     <div {...other} style={{ marginLeft: "10px" }}>
       <CommonHeader />
@@ -207,7 +206,7 @@ const Checkout = (props) => {
                 {Country &&
                   Country.map((item) => {
                     return (
-                      <MenuItem key={item.name} value={item.name}>
+                      <MenuItem key={item.name} value={item.code}>
                         {item.name}
                       </MenuItem>
                     );
@@ -220,7 +219,7 @@ const Checkout = (props) => {
           <Grid item sm={6} xs={12}>
             <TextField
               fullWidth
-              label="Street Address *"
+              label="Street Line 1 *"
               name="address1"
               onChange={(e) => setAddress1(e.target.value)}
             />
@@ -231,7 +230,7 @@ const Checkout = (props) => {
             <TextField
               fullWidth
               label="Street Line 2 (optional)"
-              name="address1"
+              name="address2"
               onChange={(e) => setAddress2(e.target.value)}
             />
           </Grid>
@@ -269,7 +268,7 @@ const Checkout = (props) => {
                   {stateData &&
                     stateData.map((item) => {
                       return (
-                        <MenuItem key={item.name} value={item.name}>
+                        <MenuItem key={item.code} value={item.code}>
                           {item.name}
                         </MenuItem>
                       );
@@ -331,30 +330,30 @@ const Checkout = (props) => {
           >
             <table
               style={{ width: "100%" }}
-              class="shop_table woocommerce-checkout-review-order-table"
+              className="shop_table woocommerce-checkout-review-order-table"
             >
               <thead>
                 <tr>
-                  <th class="product-name">Product</th>
-                  <th class="product-total">Subtotal</th>
+                  <th className="product-name">Product</th>
+                  <th className="product-total">Subtotal</th>
                 </tr>
               </thead>
               <tbody>
                 {product &&
                   product.map((item) => {
                     return (
-                      <tr class="cart_item">
-                        <td class="product-name">
+                      <tr className="cart_item">
+                        <td className="product-name">
                           {item.product.name} ×&nbsp;{" "}
-                          <strong class="product-quantity">
+                          <strong className="product-quantity">
                             {" "}
                             &nbsp;{item.quantity}
                           </strong>{" "}
                         </td>
-                        <td class="product-total">
-                          <span class="woocommerce-Price-amount amount">
+                        <td className="product-total">
+                          <span className="woocommerce-Price-amount amount">
                             <bdi>
-                              <span class="woocommerce-Price-currencySymbol">
+                              <span className="woocommerce-Price-currencySymbol">
                                 $
                               </span>
                               {item.quantity * item.product.price}
@@ -366,25 +365,27 @@ const Checkout = (props) => {
                   })}
               </tbody>
               <tfoot>
-                <tr class="cart-subtotal">
+                <tr className="cart-subtotal">
                   <th>Subtotal</th>
                   <td>
-                    <span class="woocommerce-Price-amount amount">
+                    <span className="woocommerce-Price-amount amount">
                       <bdi>
-                        <span class="woocommerce-Price-currencySymbol">$</span>
+                        <span className="woocommerce-Price-currencySymbol">
+                          $
+                        </span>
                         {total}
                       </bdi>
                     </span>
                   </td>
                 </tr>
 
-                <tr class="order-total">
+                <tr className="order-total">
                   <th>Total</th>
                   <td>
                     <strong>
-                      <span class="woocommerce-Price-amount amount">
+                      <span className="woocommerce-Price-amount amount">
                         <bdi>
-                          <span class="woocommerce-Price-currencySymbol">
+                          <span className="woocommerce-Price-currencySymbol">
                             $
                           </span>
                           {total}
@@ -426,6 +427,7 @@ const Checkout = (props) => {
                 expandIcon={<ExpandMoreIcon />}
                 aria-controls="panel2a-content"
                 id="panel2a-header"
+                onClick={() => handleClick()}
               >
                 <Typography style={{ fontWeight: "700", fontSize: "20px" }}>
                   {" "}

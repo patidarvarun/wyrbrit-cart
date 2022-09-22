@@ -4,9 +4,9 @@ const stripe = require("stripe")(
 
 module.exports = async (req, res) => {
   const { id } = req.body;
-  let session;
+  let paymentIntent;
   try {
-    session = await stripe.checkout.sessions
+    paymentIntent = await stripe.paymentIntents
       .retrieve(id)
       .then((data) => {
         return res.send(data);
@@ -18,5 +18,5 @@ module.exports = async (req, res) => {
     res.status(500).json({ statusCode: 500, message: err.message });
   }
 
-  return session;
+  return paymentIntent;
 };
