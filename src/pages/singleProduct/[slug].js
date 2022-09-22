@@ -90,24 +90,32 @@ function singleProduct() {
   let products = [];
 
   function getProductInfo(pro) {
+    const productData = { product: pro[0], quantity: quantity };
     const getLocalData = localStorage.getItem("data");
-
     if (!getLocalData) {
-      products.push({ product: pro[0], quantity: quantity });
+      products.push(productData);
       localStorage.setItem("data", JSON.stringify(products));
     } else {
       const alreadyProduct = JSON.parse(getLocalData);
+      alreadyProduct.forEach((element) => {
+        if (element.product.id === pro[0].id) {
+          alert("Already in cart");
+        } else {
+          products.push(element);
+          products.push(productData);
+          localStorage.setItem("data", JSON.stringify(products));
+        }
+      });
 
-      if (
-        !alreadyProduct.includes({ product: pro[0], quantity: quantity }) &&
-        alreadyProduct.length > 0
-      ) {
-        alreadyProduct.push({ product: pro[0], quantity: quantity });
-        localStorage.setItem("data", JSON.stringify(alreadyProduct));
-      } else {
-        products.push({ product: pro[0], quantity: quantity });
-        localStorage.setItem("data", JSON.stringify(products));
-      }
+      // if (alreadyProduct.includes(productData)) {
+      //   // alreadyProduct.push({ product: pro[0], quantity: quantity });
+      //   // localStorage.setItem("data", JSON.stringify(alreadyProduct));
+      //   console.log("alreadyProduct11111111111", alreadyProduct);
+      // } else {
+      //   // products.push(productData);
+      //   // localStorage.setItem("data", JSON.stringify(products));
+      //   console.log("productsAddd", alreadyProduct);
+      // }
     }
   }
   const addToCart = () => {

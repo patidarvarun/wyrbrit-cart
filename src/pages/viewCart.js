@@ -131,7 +131,7 @@ function ViewCart() {
               }}
             >
               <h4>Subtotal &emsp;&emsp;&emsp;&emsp;&emsp;{total}</h4>
-              <h4>Total &emsp;&emsp;&emsp;&emsp;&emsp;&emsp; &nbsp;{total}</h4>
+              <h4>Total &emsp;&emsp;&emsp;&emsp;&emsp; &emsp; &nbsp;{total}</h4>
             </Box>
             <Link href="/checkout">
               <Button size="large" sx={{ mr: 3 }} className="cart">
