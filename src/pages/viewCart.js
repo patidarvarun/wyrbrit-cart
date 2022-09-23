@@ -100,6 +100,7 @@ function ViewCart() {
             <Grid container spacing={12}>
               <Grid item xs={12} sm container>
                 <Grid item xs container direction="column" spacing={2}>
+                  <h1>Cart</h1>
                   <table>
                     <tr>
                       <th scope="col">Product</th>
