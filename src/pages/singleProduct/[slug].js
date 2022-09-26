@@ -106,16 +106,6 @@ function singleProduct() {
           localStorage.setItem("data", JSON.stringify(products));
         }
       });
-
-      // if (alreadyProduct.includes(productData)) {
-      //   // alreadyProduct.push({ product: pro[0], quantity: quantity });
-      //   // localStorage.setItem("data", JSON.stringify(alreadyProduct));
-      //   console.log("alreadyProduct11111111111", alreadyProduct);
-      // } else {
-      //   // products.push(productData);
-      //   // localStorage.setItem("data", JSON.stringify(products));
-      //   console.log("productsAddd", alreadyProduct);
-      // }
     }
   }
   const addToCart = () => {
@@ -152,7 +142,7 @@ function singleProduct() {
             <Grid container spacing={2} key={data.id}>
               <Grid item>
                 <ButtonBase sx={{ width: 300, height: 300 }}>
-                  <Img alt="complex" src={data?.images[0].src} />
+                  <Img alt="complex" src={data?.images[0]?.src} />
                 </ButtonBase>
               </Grid>
               <Grid item xs={12} sm container>

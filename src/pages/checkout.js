@@ -16,6 +16,8 @@ import { useStripe, useElements, CardElement } from "@stripe/react-stripe-js";
 import AccordionSummary from "@mui/material/AccordionSummary";
 import AccordionDetails from "@mui/material/AccordionDetails";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import wooCredential from "../data/wooCommerce/wooCredentialKey";
+import Loader from "../components/common/loader";
 import Select from "@mui/material/Select";
 
 const useOptions = () => {
@@ -45,6 +47,7 @@ const Checkout = (props) => {
   const stripe = useStripe();
   const elements = useElements();
   const options = useOptions();
+  const wooapi = wooCredential();
   const { billing, onChange, ...other } = props;
   let getData = localStorage.getItem("data");
   let product = JSON.parse(getData);
@@ -62,13 +65,64 @@ const Checkout = (props) => {
   const [state, setState] = useState("");
   const [stateData, setStateData] = useState("");
   const [stateDatas, setStateDatas] = useState("");
+  const [loading, setLoading] = useState(false);
 
   let total = 0;
   let pric = 0;
+  let productArray = [];
   for (let i = 0; i < product.length; i++) {
     pric = product[i].quantity * product[i].product.price;
     total = total + pric;
   }
+  {
+    product.map((data) => {
+      productArray.push({
+        product_id: data.product.id,
+        quantity: data.quantity,
+        total: `${data.quantity * data.product.price}`,
+      });
+    });
+  }
+
+  const createOrder = async () => {
+    const handleData = {
+      payment_method: "",
+      payment_method_title: "",
+      set_paid: true,
+      billing: {
+        first_name: firstName,
+        last_name: lastName,
+        address_1: address1,
+        address_2: address2,
+        city: city,
+        state: stateDatas === "" ? state : stateDatas,
+        postcode: zipCode,
+        country: countryy,
+        email: email,
+        phone: phone,
+      },
+      shipping: {
+        first_name: firstName,
+        last_name: lastName,
+        address_1: address1,
+        address_2: address2,
+        city: city,
+        state: stateDatas === "" ? state : stateDatas,
+        postcode: zipCode,
+        country: countryy,
+      },
+      line_items: productArray,
+    };
+
+    try {
+      const response = await wooapi.post("orders", handleData).then((data) => {
+        localStorage.setItem("orderId", data.data.id);
+        setLoading(false);
+      });
+    } catch (error) {
+      console.log("error", error.response);
+    }
+  };
 
   function handleClick() {
     email === ""
@@ -93,7 +147,9 @@ const Checkout = (props) => {
         })
           .then((res) => res.json())
           .then((json) => {
+            setLoading(true);
             setClientSecret(json.client_secret);
+            createOrder();
           });
   }
 
@@ -143,13 +199,13 @@ const Checkout = (props) => {
       console.log("error", result.error.message);
     } else {
       if (result.paymentIntent.status === "succeeded") {
-        console.log("@@@@@@@@result", result);
         window.location.replace(
           `http://localhost:3000/success?key=${result.paymentIntent.id}`
         );
       }
     }
   };
+
   return (
     <div {...other} style={{ marginLeft: "10px" }}>
       <CommonHeader />
@@ -436,34 +492,51 @@ const Checkout = (props) => {
               </AccordionSummary>
               <AccordionDetails>
                 <form onSubmit={handleSubmit}>
-                  <label>
-                    Card details
-                    <CardElement
-                      options={options}
-                      onReady={() => {
-                        console.log("CardElement [ready]");
-                      }}
-                      onChange={(event) => {
-                        console.log("CardElement [change]", event);
-                      }}
-                      onBlur={() => {
-                        console.log("CardElement [blur]");
-                      }}
-                      onFocus={() => {
-                        console.log("CardElement [focus]");
-                      }}
-                    />
-                  </label>
-
-                  <Button
-                    type="submit"
-                    size="large"
-                    sx={{ mr: 3 }}
-                    disabled={!stripe}
-                    className="orderr"
-                  >
-                    Place order
-                  </Button>
+                  {!loading ? (
+                    <>
+                      <label>
+                        Card details
+                        <CardElement
+                          options={options}
+                          onReady={() => {
+                            console.log("CardElement [ready]");
+                          }}
+                          onChange={(event) => {
+                            console.log("CardElement [change]", event);
+                          }}
+                          onBlur={() => {
+                            console.log("CardElement [blur]");
+                          }}
+                          onFocus={() => {
+                            console.log("CardElement [focus]");
+                          }}
+                        />
+                      </label>
+                      {email === "" ? (
+                        <Button
+                          type="submit"
+                          size="large"
+                          sx={{ mr: 3 }}
+                          disabled
+                          className="orderr "
+                        >
+                          Place order
+                        </Button>
+                      ) : (
+                        <Button
+                          type="submit"
+                          size="large"
+                          sx={{ mr: 3 }}
+                          disabled={!stripe}
+                          className="orderr "
+                        >
+                          Place order
+                        </Button>
+                      )}
+                    </>
+                  ) : (
+                    <Loader />
+                  )}
                 </form>
               </AccordionDetails>
             </Accordion>

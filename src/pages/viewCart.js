@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import Paper from "@mui/material/Paper";
 import Grid from "@mui/material/Grid";
 import DialogTitle from "@mui/material/DialogTitle";
@@ -65,15 +65,47 @@ BootstrapDialogTitle.propTypes = {
 function ViewCart() {
   let getData = localStorage.getItem("data");
   let product = JSON.parse(getData);
+  const [quantity1, setQuantity1] = useState(1);
 
   let total = 0;
   let pric = 0;
-  console.log("product", product);
   for (let i = 0; i < product.length; i++) {
     pric = product[i].quantity * product[i].product.price;
     total = total + pric;
   }
+  let products = [];
 
+  function handleCart(e, data) {
+    setQuantity1(e.target.value);
+
+    const getLocalData = localStorage.getItem("data");
+    const alreadyProduct = JSON.parse(getLocalData);
+    var dd = { ...alreadyProduct[0], quantity: e.target.value };
+    console.log(dd, "deewwwwwwwwwwwwwwwwww", alreadyProduct);
+    alreadyProduct.forEach((element) => {
+      console.log("elemnettt", element);
+      if (element.product.id === data.product.id) {
+        products.push(dd);
+        localStorage.setItem("data", JSON.stringify(products));
+      } else {
+        console.log("dekekkkk");
+      }
+    });
+
+    // const getLocalData = localStorage.getItem("data");
+    // const alreadyProduct = JSON.parse(getLocalData);
+    // alreadyProduct.forEach((element) => {
+    //   if (element.product.id === data.product.id) {
+    //     var dd = { ...element, quantity: e.target.value };
+    //     products.push(dd);
+    //     console.log("productsssssssssssss", products);
+
+    //     //  localStorage.setItem("data", JSON.stringify(products[i]));
+    //   } else {
+    //     console.log("dekekkkk");
+    //   }
+    // });
+  }
   return (
     <>
       <CommonHeader />
@@ -114,7 +146,19 @@ function ViewCart() {
                           <tr key={item.product.id}>
                             <th scope="row1">{item.product.name}</th>
                             <td>{item.product.price}</td>
-                            <td>{item.quantity}</td>
+                            <td>
+                              <input
+                                type="number"
+                                style={{
+                                  width: "50px",
+                                  height: "46px",
+                                  textAlign: "center",
+                                  marginRight: "10px",
+                                }}
+                                defaultValue={item.quantity}
+                                onClick={(e) => handleCart(e, item)}
+                              />
+                            </td>
                             <td>{item.product.price * item.quantity}</td>
                           </tr>
                         );

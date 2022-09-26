@@ -13,17 +13,20 @@ import {
   Typography,
   Button,
 } from "@mui/material";
-import Link from "next/link";
 import { useRouter } from "next/router";
 import { CommonHeader } from "../components/commonHeader";
+import wooCredential from "../data/wooCommerce/wooCredentialKey";
 
 const Success = () => {
   const router = useRouter();
+  const wooapi = wooCredential();
   const id = router.query.key;
   const [paymentData, setPaymentData] = useState("");
   let getData = localStorage.getItem("data");
+  let orderid = localStorage.getItem("orderId");
   let product = JSON.parse(getData);
-
+  const [orderData, setOrderData] = useState("");
+  let datee = orderData?.data?.date_completed;
   var today = new Date().toLocaleString("en-US", {
     day: "2-digit",
     month: "long",
@@ -51,10 +54,22 @@ const Success = () => {
       }),
     })
       .then((res) => res.json())
-      .then((json) => {
+      .then(async (json) => {
         setPaymentData(json);
+        const handleUpdate = {
+          status: "completed",
+          transaction_id: json.payment_method,
+        };
+        try {
+          await wooapi.post(`orders/${orderid}`, handleUpdate).then((data) => {
+            setOrderData(data);
+          });
+        } catch (error) {
+          console.log("error", error.res);
+        }
       });
   }
+
   useEffect(() => {
     getPaymentIntent();
   }, [id]);
@@ -101,7 +116,7 @@ const Success = () => {
                         variant="subtitle2"
                         style={{ fontWeight: "700" }}
                       >
-                        10327
+                        {orderid}
                       </Typography>
                     }
                   />
@@ -311,6 +326,12 @@ const Success = () => {
                   </Box>
                 </Grid>
               </Grid>
+              <div style={{ display: "flex" }}>
+                <p className="paymentcss2">Transaction_id :</p>
+                <p className="paymentcss">
+                  &nbsp;{paymentData?.payment_method}{" "}
+                </p>
+              </div>
               <ListItem disableGutters divider></ListItem>
             </List>
           </CardContent>
