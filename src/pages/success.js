@@ -73,7 +73,6 @@ const Success = () => {
   useEffect(() => {
     getPaymentIntent();
   }, [id]);
-
   return (
     <div>
       <CommonHeader />
@@ -89,11 +88,17 @@ const Success = () => {
       >
         <Card>
           <CardContent>
-            <CardHeader title="Order received" />
+            <p style={{ fontWeight: "600", fontSize: "17px" }}>
+              Order received
+            </p>
             <Typography
               color="textSecondary"
               variant="subtitle2"
-              style={{ marginLeft: "25px", marginTop: "-16px" }}
+              style={{
+                marginLeft: "2px",
+                marginTop: "-8px",
+                fontSize: "17px",
+              }}
             >
               Thank you. Your order has been received.
             </Typography>
@@ -106,7 +111,11 @@ const Success = () => {
                     primary={
                       <Typography
                         variant="caption"
-                        style={{ fontSize: "11px", fontWeight: "500" }}
+                        style={{
+                          fontSize: "10px",
+                          fontWeight: "500",
+                          color: "#4a4646",
+                        }}
                       >
                         ORDER NUMBER:
                       </Typography>
@@ -114,7 +123,7 @@ const Success = () => {
                     secondary={
                       <Typography
                         variant="subtitle2"
-                        style={{ fontWeight: "700" }}
+                        style={{ fontWeight: "700", fontSize: "15px" }}
                       >
                         {orderid}
                       </Typography>
@@ -128,7 +137,11 @@ const Success = () => {
                     primary={
                       <Typography
                         variant="caption"
-                        style={{ fontSize: "11px", fontWeight: "500" }}
+                        style={{
+                          fontSize: "10px",
+                          fontWeight: "500",
+                          color: "#4a4646",
+                        }}
                       >
                         DATE:
                       </Typography>
@@ -136,7 +149,7 @@ const Success = () => {
                     secondary={
                       <Typography
                         variant="subtitle2"
-                        style={{ fontWeight: "700" }}
+                        style={{ fontWeight: "700", fontSize: "15px" }}
                       >
                         {today}
                       </Typography>
@@ -150,7 +163,37 @@ const Success = () => {
                     primary={
                       <Typography
                         variant="caption"
-                        style={{ fontSize: "11px", fontWeight: "500" }}
+                        style={{
+                          fontSize: "10px",
+                          fontWeight: "500",
+                          color: "#4a4646",
+                        }}
+                      >
+                        EMAIL:
+                      </Typography>
+                    }
+                    secondary={
+                      <Typography
+                        variant="subtitle2"
+                        style={{ fontWeight: "700", fontSize: "15px" }}
+                      >
+                        {paymentData?.charges?.data[0]?.billing_details?.email}
+                      </Typography>
+                    }
+                  />
+                </ListItem>
+                <ListItem disableGutters>
+                  <ListItemText
+                    className="bordercss"
+                    disableTypography
+                    primary={
+                      <Typography
+                        variant="caption"
+                        style={{
+                          fontSize: "10px",
+                          fontWeight: "500",
+                          color: "#4a4646",
+                        }}
                       >
                         TOTAL:
                       </Typography>
@@ -158,7 +201,7 @@ const Success = () => {
                     secondary={
                       <Typography
                         variant="subtitle2"
-                        style={{ fontWeight: "700" }}
+                        style={{ fontWeight: "700", fontSize: "15px" }}
                       >
                         ${paymentData?.amount / 100}
                       </Typography>
@@ -172,7 +215,11 @@ const Success = () => {
                     primary={
                       <Typography
                         variant="caption"
-                        style={{ fontSize: "11px", fontWeight: "500" }}
+                        style={{
+                          fontSize: "10px",
+                          fontWeight: "500",
+                          color: "#4a4646",
+                        }}
                       >
                         PAYMENT METHOD:
                       </Typography>
@@ -180,7 +227,7 @@ const Success = () => {
                     secondary={
                       <Typography
                         variant="subtitle2"
-                        style={{ fontWeight: "700" }}
+                        style={{ fontWeight: "700", fontSize: "15px" }}
                       >
                         {paymentData?.charges?.data[0].payment_method_details?.card.funding
                           .charAt(0)
@@ -207,9 +254,10 @@ const Success = () => {
               </div>
               <p
                 style={{
-                  fontSize: "1.9em",
-                  marginLeft: "24px",
+                  fontSize: "2em",
                   fontWeight: "600",
+                  marginBottom: "-42px",
+                  marginTop: "42px",
                 }}
               >
                 Order details
@@ -322,6 +370,70 @@ const Success = () => {
                           </td>
                         </tr>
                       </tfoot>
+                    </table>
+                  </Box>
+                </Grid>
+              </Grid>
+              <p
+                style={{
+                  fontSize: "2em",
+                  fontWeight: "600",
+                  marginBottom: "-42px",
+                  marginTop: "42px",
+                }}
+              >
+                Billing address
+              </p>
+              <Grid container spacing={3} sx={{ marginTop: "3px" }}>
+                <Grid item sm={12} xs={12}>
+                  <Box
+                    sx={{
+                      color: "text.primary",
+                      mt: 3,
+                    }}
+                  >
+                    <table
+                      style={{ width: "100%" }}
+                      className="shop_table woocommerce-checkout-review-order-table"
+                    >
+                      <p className="billing">
+                        {paymentData?.charges?.data[0]?.billing_details?.name}
+                      </p>
+                      <p className="billing">
+                        {
+                          paymentData?.charges?.data[0]?.billing_details
+                            ?.address?.line1
+                        }
+                      </p>
+                      <p className="billing">
+                        {
+                          paymentData?.charges?.data[0]?.billing_details
+                            ?.address?.line2
+                        }
+                      </p>
+
+                      <p className="billing">
+                        {
+                          paymentData?.charges?.data[0]?.billing_details
+                            ?.address?.city
+                        }
+                        , &nbsp;
+                        {
+                          paymentData?.charges?.data[0]?.billing_details
+                            ?.address?.state
+                        }{" "}
+                        &nbsp;
+                        {
+                          paymentData?.charges?.data[0]?.billing_details
+                            ?.address?.postal_code
+                        }
+                      </p>
+                      <p className="billing1">
+                        {paymentData?.charges?.data[0]?.billing_details?.phone}
+                      </p>
+                      <p className="billing1">
+                        {paymentData?.charges?.data[0]?.billing_details?.email}
+                      </p>
                     </table>
                   </Box>
                 </Grid>

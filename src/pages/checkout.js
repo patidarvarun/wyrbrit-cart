@@ -191,6 +191,7 @@ const Checkout = (props) => {
           },
           email: email,
           name: `${firstName + " " + lastName}`,
+          phone: phone,
         },
       },
     });

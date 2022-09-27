@@ -93,11 +93,21 @@ table {
     margin-left: 10px;
   }
   .fontSizee{
-    font-size: 15px;
+    font-size: 13px;
   }
   .paymentcss{
     font-weight: 500;
+    color:#ff0505;
   }
   .paymentcss2{
-    font-weight: 300;
+    font-weight: 600;
+  }
+  .billing{
+    margin-left: 18px;
+    font-size: 15px;
+  }
+  .billing1{
+    margin-left: 18px;
+    font-size: 15px;
+    color: #777;
   }

@@ -10,29 +10,6 @@ import Box from "@mui/material/Box";
 import { Button } from "@mui/material";
 import Link from "next/link";
 
-const useOptions = () => {
-  const options = useMemo(
-    () => ({
-      style: {
-        base: {
-          color: "#424770",
-          letterSpacing: "0.025em",
-          fontFamily: "Source Code Pro, monospace",
-          "::placeholder": {
-            color: "#aab7c4",
-          },
-        },
-        invalid: {
-          color: "#9e2146",
-        },
-      },
-    }),
-    []
-  );
-
-  return options;
-};
-
 const BootstrapDialogTitle = (props) => {
   const { children, onClose, ...other } = props;
 
@@ -75,36 +52,19 @@ function ViewCart() {
   }
   let products = [];
 
-  function handleCart(e, data) {
+  function handleCart(e, data, i) {
     setQuantity1(e.target.value);
 
     const getLocalData = localStorage.getItem("data");
     const alreadyProduct = JSON.parse(getLocalData);
-    var dd = { ...alreadyProduct[0], quantity: e.target.value };
-    console.log(dd, "deewwwwwwwwwwwwwwwwww", alreadyProduct);
-    alreadyProduct.forEach((element) => {
-      console.log("elemnettt", element);
-      if (element.product.id === data.product.id) {
-        products.push(dd);
-        localStorage.setItem("data", JSON.stringify(products));
+    alreadyProduct.forEach((element, index) => {
+      if (index === i) {
+        products.push({ product: data.product, quantity: e.target.value });
       } else {
-        console.log("dekekkkk");
+        products.push({ product: element.product, quantity: element.quantity });
       }
     });
-
-    // const getLocalData = localStorage.getItem("data");
-    // const alreadyProduct = JSON.parse(getLocalData);
-    // alreadyProduct.forEach((element) => {
-    //   if (element.product.id === data.product.id) {
-    //     var dd = { ...element, quantity: e.target.value };
-    //     products.push(dd);
-    //     console.log("productsssssssssssss", products);
-
-    //     //  localStorage.setItem("data", JSON.stringify(products[i]));
-    //   } else {
-    //     console.log("dekekkkk");
-    //   }
-    // });
+    localStorage.setItem("data", JSON.stringify(products));
   }
   return (
     <>
@@ -141,7 +101,7 @@ function ViewCart() {
                       <th scope="col">SubTotal</th>
                     </tr>
                     {product &&
-                      product.map((item) => {
+                      product.map((item, index) => {
                         return (
                           <tr key={item.product.id}>
                             <th scope="row1">{item.product.name}</th>
@@ -156,7 +116,7 @@ function ViewCart() {
                                   marginRight: "10px",
                                 }}
                                 defaultValue={item.quantity}
-                                onClick={(e) => handleCart(e, item)}
+                                onClick={(e) => handleCart(e, item, index)}
                               />
                             </td>
                             <td>{item.product.price * item.quantity}</td>
