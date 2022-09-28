@@ -16,9 +16,16 @@ const Shop = (props) => {
   const [selectedTheme, setSelectedTheme] = useState(settings.theme);
   const [product, setProduct] = useState("");
   const localData = localStorage.getItem("data");
+  const localProduct = localStorage.getItem("productDataa");
+  let localStorageProduct = JSON.parse(localProduct);
   function prodDetail() {
     const prod = productss();
-    prod.then((data) => setProduct(data.data));
+    prod.then(
+      (data) => (
+        setProduct(data.data),
+        localStorage.setItem("productDataa", JSON.stringify(data.data))
+      )
+    );
   }
 
   useEffect(() => {
@@ -38,7 +45,6 @@ const Shop = (props) => {
     ...settings,
     mode: selectedTheme,
   });
-
   return (
     <>
       <CommonHeader />
@@ -77,77 +83,148 @@ const Shop = (props) => {
             }}
           >
             <Grid container spacing={3}>
-              {product &&
-                product.map((item) => (
-                  <Grid item key={item.slug} md={4} xs={12}>
-                    <Card>
-                      <Box sx={{ p: 2 }}>
-                        <Link href={"/singleProduct/" + item.slug}>
-                          <a>
-                            <CardMedia
-                              image={
-                                item?.images[0]?.src
-                                  ? item.images[0]?.src
-                                  : "/default.jpg"
-                              }
-                              sx={{
-                                backgroundColor: "background.default",
-                                height: 200,
-                              }}
-                            />
-                          </a>
-                        </Link>
-                        <Box
-                          sx={{
-                            alignItems: "center",
-                            display: "flex",
-                            mt: 2,
-                          }}
-                        >
-                          <Box sx={{ ml: 2 }}>
-                            <Link
-                              href={"/singleProduct/" + item.slug}
-                              color="textPrimary"
-                              variant="h6"
-                            >
-                              {item.name}
-                            </Link>
+              {localStorageProduct === null
+                ? product &&
+                  product.map((item) => (
+                    <Grid item key={item.slug} md={4} xs={12}>
+                      <Card>
+                        <Box sx={{ p: 2 }}>
+                          <Link href={"/singleProduct/" + item.slug}>
+                            <a>
+                              <CardMedia
+                                image={
+                                  item?.images[0]?.src
+                                    ? item.images[0]?.src
+                                    : "/default.jpg"
+                                }
+                                sx={{
+                                  backgroundColor: "background.default",
+                                  height: 200,
+                                }}
+                              />
+                            </a>
+                          </Link>
+                          <Box
+                            sx={{
+                              alignItems: "center",
+                              display: "flex",
+                              mt: 2,
+                            }}
+                          >
+                            <Box sx={{ ml: 2 }}>
+                              <Link
+                                href={"/singleProduct/" + item.slug}
+                                color="textPrimary"
+                                variant="h6"
+                              >
+                                {item.name}
+                              </Link>
+                            </Box>
                           </Box>
                         </Box>
-                      </Box>
-                      <Box
-                        sx={{
-                          pb: 2,
-                          px: 3,
-                        }}
-                      >
-                        <Typography color="textSecondary" variant="body2">
-                          {item.short_description.replace(/<(.|\n)*?>/g, "")}
-                        </Typography>
-                      </Box>
-                      <Box
-                        sx={{
-                          px: 3,
-                          py: 2,
-                        }}
-                      >
-                        <Grid
-                          alignItems="center"
-                          container
-                          justifyContent="space-between"
-                          spacing={3}
+                        <Box
+                          sx={{
+                            pb: 2,
+                            px: 3,
+                          }}
                         >
-                          <Grid item>
-                            <Typography variant="subtitle2">
-                              {item?.price ? `$${item.price}` : ""}
-                            </Typography>
+                          <Typography color="textSecondary" variant="body2">
+                            {item.short_description.replace(/<(.|\n)*?>/g, "")}
+                          </Typography>
+                        </Box>
+                        <Box
+                          sx={{
+                            px: 3,
+                            py: 2,
+                          }}
+                        >
+                          <Grid
+                            alignItems="center"
+                            container
+                            justifyContent="space-between"
+                            spacing={3}
+                          >
+                            <Grid item>
+                              <Typography variant="subtitle2">
+                                {item?.price ? `$${item.price}` : ""}
+                              </Typography>
+                            </Grid>
                           </Grid>
-                        </Grid>
-                      </Box>
-                      <Divider />
-                    </Card>
-                  </Grid>
-                ))}
+                        </Box>
+                        <Divider />
+                      </Card>
+                    </Grid>
+                  ))
+                : localStorageProduct.map((item) => (
+                    <Grid item key={item.slug} md={4} xs={12}>
+                      <Card>
+                        <Box sx={{ p: 2 }}>
+                          <Link href={"/singleProduct/" + item.slug}>
+                            <a>
+                              <CardMedia
+                                image={
+                                  item?.images[0]?.src
+                                    ? item.images[0]?.src
+                                    : "/default.jpg"
+                                }
+                                sx={{
+                                  backgroundColor: "background.default",
+                                  height: 200,
+                                }}
+                              />
+                            </a>
+                          </Link>
+                          <Box
+                            sx={{
+                              alignItems: "center",
+                              display: "flex",
+                              mt: 2,
+                            }}
+                          >
+                            <Box sx={{ ml: 2 }}>
+                              <Link
+                                href={"/singleProduct/" + item.slug}
+                                color="textPrimary"
+                                variant="h6"
+                              >
+                                {item.name}
+                              </Link>
+                            </Box>
+                          </Box>
+                        </Box>
+                        <Box
+                          sx={{
+                            pb: 2,
+                            px: 3,
+                          }}
+                        >
+                          <Typography color="textSecondary" variant="body2">
+                            {item.short_description.replace(/<(.|\n)*?>/g, "")}
+                          </Typography>
+                        </Box>
+                        <Box
+                          sx={{
+                            px: 3,
+                            py: 2,
+                          }}
+                        >
+                          <Grid
+                            alignItems="center"
+                            container
+                            justifyContent="space-between"
+                            spacing={3}
+                          >
+                            <Grid item>
+                              <Typography variant="subtitle2">
+                                {item?.price ? `$${item.price}` : ""}
+                              </Typography>
+                            </Grid>
+                          </Grid>
+                        </Box>
+                        <Divider />
+                      </Card>
+                    </Grid>
+                  ))}
             </Grid>
           </Box>
         </ThemeProvider>

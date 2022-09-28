@@ -133,7 +133,7 @@ const Checkout = (props) => {
   function handleClick() {
     email === ""
       ? console.log("Required all field*")
-      : fetch("/api/checkout-api/", {
+      : fetch("/api/checkoutApi/", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
