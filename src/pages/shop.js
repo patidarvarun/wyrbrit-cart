@@ -15,7 +15,7 @@ const Shop = (props) => {
   const { settings } = useSettings();
   const [selectedTheme, setSelectedTheme] = useState(settings.theme);
   const [product, setProduct] = useState("");
-
+  const localData = localStorage.getItem("data");
   function prodDetail() {
     const prod = productss();
     prod.then((data) => setProduct(data.data));
@@ -57,6 +57,16 @@ const Shop = (props) => {
           }
           title={name}
         />
+        <Divider />
+        {localData === null ? (
+          ""
+        ) : (
+          <div className="carttt">
+            <Link href="/viewCart">
+              <a>Cart</a>
+            </Link>
+          </div>
+        )}
         <Divider />
         <ThemeProvider theme={theme}>
           <Box

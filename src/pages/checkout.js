@@ -12,7 +12,13 @@ import { CommonHeader } from "../components/commonHeader";
 import Accordion from "@mui/material/Accordion";
 import country from "../data/wooCommerce/countries";
 import MenuItem from "@mui/material/MenuItem";
-import { useStripe, useElements, CardElement } from "@stripe/react-stripe-js";
+import {
+  useStripe,
+  useElements,
+  CardNumberElement,
+  CardCvcElement,
+  CardExpiryElement,
+} from "@stripe/react-stripe-js";
 import AccordionSummary from "@mui/material/AccordionSummary";
 import AccordionDetails from "@mui/material/AccordionDetails";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
@@ -179,7 +185,7 @@ const Checkout = (props) => {
     }
     const result = await stripe.confirmCardPayment(`${clientSecret}`, {
       payment_method: {
-        card: elements.getElement(CardElement),
+        card: elements.getElement(CardNumberElement),
         billing_details: {
           address: {
             city: city,
@@ -496,20 +502,56 @@ const Checkout = (props) => {
                   {!loading ? (
                     <>
                       <label>
-                        Card details
-                        <CardElement
+                        Card Number *
+                        <CardNumberElement
                           options={options}
                           onReady={() => {
-                            console.log("CardElement [ready]");
+                            console.log("CardNumberElement [ready]");
                           }}
                           onChange={(event) => {
-                            console.log("CardElement [change]", event);
+                            console.log("CardNumberElement [change]", event);
                           }}
                           onBlur={() => {
-                            console.log("CardElement [blur]");
+                            console.log("CardNumberElement [blur]");
                           }}
                           onFocus={() => {
-                            console.log("CardElement [focus]");
+                            console.log("CardNumberElement [focus]");
+                          }}
+                        />
+                      </label>
+                      <label>
+                        Expiry date *
+                        <CardExpiryElement
+                          options={options}
+                          onReady={() => {
+                            console.log("CardNumberElement [ready]");
+                          }}
+                          onChange={(event) => {
+                            console.log("CardNumberElement [change]", event);
+                          }}
+                          onBlur={() => {
+                            console.log("CardNumberElement [blur]");
+                          }}
+                          onFocus={() => {
+                            console.log("CardNumberElement [focus]");
+                          }}
+                        />
+                      </label>
+                      <label>
+                        Card Code (CVC) *
+                        <CardCvcElement
+                          options={options}
+                          onReady={() => {
+                            console.log("CardNumberElement [ready]");
+                          }}
+                          onChange={(event) => {
+                            console.log("CardNumberElement [change]", event);
+                          }}
+                          onBlur={() => {
+                            console.log("CardNumberElement [blur]");
+                          }}
+                          onFocus={() => {
+                            console.log("CardNumberElement [focus]");
                           }}
                         />
                       </label>

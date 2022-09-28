@@ -111,3 +111,13 @@ table {
     font-size: 15px;
     color: #777;
   }
+  .carttt {
+    text-align: end;
+    margin-right: 25px;
+}
+.StripeElement.StripeElement--empty {
+  margin-bottom: 30px !important;
+}
+.StripeElement.StripeElement--complete {
+  margin-bottom: 30px !important;
+}
