@@ -20,11 +20,9 @@ const Shop = (props) => {
   let localStorageProduct = JSON.parse(localProduct);
   function prodDetail() {
     const prod = productss();
-    prod.then(
-      (data) => (
-        setProduct(data.data),
-        localStorage.setItem("productDataa", JSON.stringify(data.data))
-      )
+    prod.then((data) =>
+      setProduct(data.data)
+      // localStorage.setItem("productDataa", JSON.stringify(data.data))
     );
   }
 
